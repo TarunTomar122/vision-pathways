@@ -77,11 +77,28 @@ def main() -> None:
         raise ValueError("The baseline predictions must contain every manifest row exactly once")
 
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    baseline_latency_path = args.output_dir / "baseline_latency.json"
+    if baseline_latency_path.exists():
+        with baseline_latency_path.open(encoding="utf-8") as handle:
+            baseline_latency = json.load(handle)
+    else:
+        baseline_runner = BaselineRunner(base_config, args.manifest, args.output_dir / "baseline-latency", args.data_root)
+        try:
+            baseline_latency = _measure_latency(baseline_runner, latency_rows, args.latency_repeats)
+        finally:
+            baseline_runner.close()
+        write_json(baseline_latency_path, baseline_latency)
+
     results = []
     for candidate in candidates:
         name = candidate["name"]
         skipped = candidate["skip_vision_blocks"]
         run_dir = args.output_dir / name
+        record_path = run_dir / "combined_ablation_record.json"
+        if record_path.exists():
+            with record_path.open(encoding="utf-8") as handle:
+                results.append(json.load(handle))
+            continue
         run_config = {**base_config, "skip_vision_blocks": skipped}
         runner = BaselineRunner(run_config, args.manifest, run_dir, args.data_root)
         try:
@@ -105,11 +122,12 @@ def main() -> None:
             "capabilities": capabilities,
             "latency": latency,
         }
-        write_json(run_dir / "combined_ablation_record.json", result)
+        write_json(record_path, result)
         results.append(result)
 
     write_json(args.output_dir / "summary.json", {
         "latency_example_ids": [row["id"] for row in latency_rows],
+        "baseline_latency": baseline_latency,
         "results": results,
     })
 
