@@ -1,0 +1,310 @@
+{
+  "counts": {
+    "attribute": 20,
+    "counting": 20,
+    "object": 20,
+    "ocr": 20,
+    "spatial": 20
+  },
+  "groups": {
+    "capability:attribute": {
+      "accuracy": 0.95,
+      "examples": 20,
+      "latency_ms": {
+        "generation": {
+          "mean": 172.57526164999035,
+          "median": 171.3644235001084,
+          "p95": 199.38487100034763
+        },
+        "total": {
+          "mean": 200.18859509998492,
+          "median": 200.11093399989477,
+          "p95": 239.40011800004868
+        },
+        "vision_encoder": {
+          "mean": 72.2722032546997,
+          "median": 70.01753616333008,
+          "p95": 94.74227142333984
+        }
+      },
+      "peak_allocated_mib": 7465.39306640625,
+      "peak_reserved_mib": 7816.0
+    },
+    "capability:counting": {
+      "accuracy": 0.7,
+      "examples": 20,
+      "latency_ms": {
+        "generation": {
+          "mean": 148.74027079997632,
+          "median": 136.039399000083,
+          "p95": 203.52998599992134
+        },
+        "total": {
+          "mean": 174.32702490002612,
+          "median": 155.23184900007436,
+          "p95": 259.52879199985546
+        },
+        "vision_encoder": {
+          "mean": 70.55746726989746,
+          "median": 62.84137725830078,
+          "p95": 129.54307556152344
+        }
+      },
+      "peak_allocated_mib": 7526.93408203125,
+      "peak_reserved_mib": 8194.0
+    },
+    "capability:object": {
+      "accuracy": 0.95,
+      "examples": 20,
+      "latency_ms": {
+        "generation": {
+          "mean": 155.22054870007196,
+          "median": 150.97352850011703,
+          "p95": 185.67029099995125
+        },
+        "total": {
+          "mean": 184.06347085003745,
+          "median": 180.4082165001546,
+          "p95": 225.86434800041388
+        },
+        "vision_encoder": {
+          "mean": 75.90898513793945,
+          "median": 69.86742401123047,
+          "p95": 105.17708587646484
+        }
+      },
+      "peak_allocated_mib": 7479.1044921875,
+      "peak_reserved_mib": 7980.0
+    },
+    "capability:ocr": {
+      "accuracy": 0.7,
+      "examples": 20,
+      "latency_ms": {
+        "generation": {
+          "mean": 144.1122588499411,
+          "median": 140.44393549988854,
+          "p95": 228.181795999717
+        },
+        "total": {
+          "mean": 148.44751825000913,
+          "median": 146.9898134998857,
+          "p95": 231.008937000297
+        },
+        "vision_encoder": {
+          "mean": 35.27852640151978,
+          "median": 33.9824161529541,
+          "p95": 51.04732894897461
+        }
+      },
+      "peak_allocated_mib": 7366.953125,
+      "peak_reserved_mib": 7816.0
+    },
+    "capability:spatial": {
+      "accuracy": 0.8,
+      "examples": 20,
+      "latency_ms": {
+        "generation": {
+          "mean": 178.64535624999007,
+          "median": 181.8594320000102,
+          "p95": 197.72767500035116
+        },
+        "total": {
+          "mean": 207.5548102499397,
+          "median": 211.93464249995486,
+          "p95": 237.6355319997856
+        },
+        "vision_encoder": {
+          "mean": 78.61105995178222,
+          "median": 81.46857452392578,
+          "p95": 95.00588989257812
+        }
+      },
+      "peak_allocated_mib": 7467.013671875,
+      "peak_reserved_mib": 8194.0
+    },
+    "source:mme": {
+      "accuracy": 0.896551724137931,
+      "examples": 29,
+      "latency_ms": {
+        "generation": {
+          "mean": 170.6810795172432,
+          "median": 171.04042700020727,
+          "p95": 197.9844959996626
+        },
+        "total": {
+          "mean": 197.8568855172006,
+          "median": 199.58373199960988,
+          "p95": 238.7287749997995
+        },
+        "vision_encoder": {
+          "mean": 70.89410545086038,
+          "median": 69.90953826904297,
+          "p95": 94.74227142333984
+        }
+      },
+      "peak_allocated_mib": 7467.013671875,
+      "peak_reserved_mib": 7816.0
+    },
+    "source:ocrbench": {
+      "accuracy": 0.7222222222222222,
+      "examples": 18,
+      "latency_ms": {
+        "generation": {
+          "mean": 143.69662399995934,
+          "median": 134.23972750001667,
+          "p95": 228.181795999717
+        },
+        "total": {
+          "mean": 146.7449136111251,
+          "median": 137.9600410000421,
+          "p95": 231.008937000297
+        },
+        "vision_encoder": {
+          "mean": 33.90303643544515,
+          "median": 33.914031982421875,
+          "p95": 38.0714225769043
+        }
+      },
+      "peak_allocated_mib": 7311.37255859375,
+      "peak_reserved_mib": 7816.0
+    },
+    "source:pope": {
+      "accuracy": 0.9473684210526315,
+      "examples": 19,
+      "latency_ms": {
+        "generation": {
+          "mean": 154.46988647375437,
+          "median": 150.49477200000183,
+          "p95": 185.67029099995125
+        },
+        "total": {
+          "mean": 183.4485715263614,
+          "median": 180.2747910001017,
+          "p95": 225.86434800041388
+        },
+        "vision_encoder": {
+          "mean": 76.28726517526727,
+          "median": 70.1878433227539,
+          "p95": 105.17708587646484
+        }
+      },
+      "peak_allocated_mib": 7479.1044921875,
+      "peak_reserved_mib": 7980.0
+    },
+    "source:tallyqa": {
+      "accuracy": 0.6875,
+      "examples": 16,
+      "latency_ms": {
+        "generation": {
+          "mean": 141.72978899998157,
+          "median": 132.43212549991767,
+          "p95": 203.52998599992134
+        },
+        "total": {
+          "mean": 166.65583756255842,
+          "median": 154.65483749994746,
+          "p95": 259.52879199985546
+        },
+        "vision_encoder": {
+          "mean": 69.94586420059204,
+          "median": 60.845375061035156,
+          "p95": 129.54307556152344
+        }
+      },
+      "peak_allocated_mib": 7526.93408203125,
+      "peak_reserved_mib": 8194.0
+    },
+    "source:vsr": {
+      "accuracy": 0.7777777777777778,
+      "examples": 18,
+      "latency_ms": {
+        "generation": {
+          "mean": 180.3877177777243,
+          "median": 181.8594320000102,
+          "p95": 187.8176089999215
+        },
+        "total": {
+          "mean": 208.90855566661534,
+          "median": 211.93464249995486,
+          "p95": 218.72114300003886
+        },
+        "vision_encoder": {
+          "mean": 78.76607004801433,
+          "median": 81.46857452392578,
+          "p95": 83.36077117919922
+        }
+      },
+      "peak_allocated_mib": 7442.03857421875,
+      "peak_reserved_mib": 8194.0
+    },
+    "suite:controlled": {
+      "accuracy": 0.896551724137931,
+      "examples": 29,
+      "latency_ms": {
+        "generation": {
+          "mean": 170.6810795172432,
+          "median": 171.04042700020727,
+          "p95": 197.9844959996626
+        },
+        "total": {
+          "mean": 197.8568855172006,
+          "median": 199.58373199960988,
+          "p95": 238.7287749997995
+        },
+        "vision_encoder": {
+          "mean": 70.89410545086038,
+          "median": 69.90953826904297,
+          "p95": 94.74227142333984
+        }
+      },
+      "peak_allocated_mib": 7467.013671875,
+      "peak_reserved_mib": 7816.0
+    },
+    "suite:external": {
+      "accuracy": 0.7887323943661971,
+      "examples": 71,
+      "latency_ms": {
+        "generation": {
+          "mean": 155.43834674646962,
+          "median": 152.64673899991976,
+          "p95": 196.0301789999903
+        },
+        "total": {
+          "mean": 176.81378460564972,
+          "median": 170.75012599980255,
+          "p95": 226.73320200010494
+        },
+        "vision_encoder": {
+          "mean": 64.74134904565946,
+          "median": 68.87535858154297,
+          "p95": 105.17708587646484
+        }
+      },
+      "peak_allocated_mib": 7526.93408203125,
+      "peak_reserved_mib": 8194.0
+    }
+  },
+  "overall": {
+    "accuracy": 0.82,
+    "examples": 100,
+    "latency_ms": {
+      "generation": {
+        "mean": 159.85873924999396,
+        "median": 166.8675914997948,
+        "p95": 197.72767500035116
+      },
+      "total": {
+        "mean": 182.91628386999946,
+        "median": 185.37227000001621,
+        "p95": 237.6355319997856
+      },
+      "vision_encoder": {
+        "mean": 66.52564840316772,
+        "median": 69.05199813842773,
+        "p95": 95.00588989257812
+      }
+    },
+    "peak_allocated_mib": 7526.93408203125,
+    "peak_reserved_mib": 8194.0
+  }
+}

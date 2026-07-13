@@ -1,1 +1,19 @@
 **/.openclaude/settings.local.json
+
+# Local and remote experiment artifacts
+.venv/
+__pycache__/
+*.py[cod]
+.cache/
+data/raw/
+data/processed/images/
+data/processed/checkpoints/
+models/
+results/raw/
+results/**/*.jsonl
+results/**/*.parquet
+
+# Credentials and local configuration
+.env
+*.pem
+*.key

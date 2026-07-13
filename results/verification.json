@@ -1,0 +1,24 @@
+{
+  "baseline": {
+    "empty_predictions": 0,
+    "examples": 1480,
+    "ids_match_manifest": true,
+    "prediction_sha256": "ce667c5ba6e89d98a8d8d209bdc454dfa960497aa6163c8ac267e163bd24662a",
+    "scores_recomputed": true,
+    "unique_prediction_ids": 1480
+  },
+  "dataset": {
+    "cross_split_image_leakage": 0,
+    "duplicate_ids": 0,
+    "examples": 1480,
+    "images_verified": 1136,
+    "manifest_sha256": "3dcae96bfb9f63d34362f0abde7dafcf883b3f42a5578c353512b7593c079fcd"
+  },
+  "pipeline": {
+    "determinism_examples": 20,
+    "deterministic_predictions": true,
+    "resume_preserved_predictions": true,
+    "smoke_accuracy": 0.82,
+    "smoke_examples": 100
+  }
+}

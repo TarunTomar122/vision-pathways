@@ -1,0 +1,27 @@
+{
+  "counts_by_capability": {
+    "attribute": 60,
+    "counting": 360,
+    "object": 360,
+    "ocr": 340,
+    "spatial": 360
+  },
+  "counts_by_source": {
+    "mme": 280,
+    "ocrbench": 300,
+    "pope": 300,
+    "tallyqa": 300,
+    "vsr": 300
+  },
+  "counts_by_split": {
+    "development": 742,
+    "test": 738
+  },
+  "counts_by_suite": {
+    "controlled": 280,
+    "external": 1200
+  },
+  "examples": 1480,
+  "manifest_sha256": "3dcae96bfb9f63d34362f0abde7dafcf883b3f42a5578c353512b7593c079fcd",
+  "unique_images": 1136
+}
