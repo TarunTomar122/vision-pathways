@@ -132,6 +132,10 @@ configuration, and dataset-manifest hash.
   28 stays within 0.95 points of baseline but has no measured end-to-end speedup; skipping four
   blocks improves matched end-to-end latency by 1.48% but loses 3.72 points overall and 7.94
   points on OCR.
+- The activation-rescue trace for skipped blocks 3, 5, 9, and 28 recovers 0.74 points when the
+  full state after block 3 is restored, 2.43 points after block 5, and 3.58 points after block 9.
+  Restoring after block 28 exactly reproduces baseline outputs. This supports a cumulative
+  refinement interpretation, especially for OCR, rather than a one-block/one-capability map.
   These pathways are not deployable universal pruners without a task-specific objective and
   recovery training.
 
@@ -144,3 +148,4 @@ configuration, and dataset-manifest hash.
 - [Verified baseline report](results/baseline-qwen25-vl-3b/README.md)
 - [One-block ablation analysis](results/ablation-qwen25-vl-3b/README.md)
 - [Combined-ablation analysis](results/combined-qwen25-vl-3b/README.md)
+- [Activation-rescue analysis](results/activation-rescue-qwen25-vl-3b/README.md)

@@ -1,0 +1,240 @@
+{
+  "baseline_accuracy": 0.8162162162162162,
+  "conditions": {
+    "fully-pruned": {
+      "accuracy": 0.779054054054054,
+      "accuracy_drop": 0.03716216216216217,
+      "examples": 1480,
+      "groups": {
+        "capability:attribute": {
+          "accuracy": 0.9666666666666667,
+          "examples": 60
+        },
+        "capability:counting": {
+          "accuracy": 0.7083333333333334,
+          "examples": 360
+        },
+        "capability:object": {
+          "accuracy": 0.8805555555555555,
+          "examples": 360
+        },
+        "capability:ocr": {
+          "accuracy": 0.7205882352941176,
+          "examples": 340
+        },
+        "capability:spatial": {
+          "accuracy": 0.7722222222222223,
+          "examples": 360
+        },
+        "source:mme": {
+          "accuracy": 0.875,
+          "examples": 280
+        },
+        "source:ocrbench": {
+          "accuracy": 0.7166666666666667,
+          "examples": 300
+        },
+        "source:pope": {
+          "accuracy": 0.8666666666666667,
+          "examples": 300
+        },
+        "source:tallyqa": {
+          "accuracy": 0.6833333333333333,
+          "examples": 300
+        },
+        "source:vsr": {
+          "accuracy": 0.76,
+          "examples": 300
+        }
+      }
+    },
+    "restore-after-03": {
+      "accuracy": 0.7864864864864864,
+      "accuracy_drop": 0.02972972972972976,
+      "examples": 1480,
+      "groups": {
+        "capability:attribute": {
+          "accuracy": 0.9333333333333333,
+          "examples": 60
+        },
+        "capability:counting": {
+          "accuracy": 0.7444444444444445,
+          "examples": 360
+        },
+        "capability:object": {
+          "accuracy": 0.8583333333333333,
+          "examples": 360
+        },
+        "capability:ocr": {
+          "accuracy": 0.7470588235294118,
+          "examples": 340
+        },
+        "capability:spatial": {
+          "accuracy": 0.7694444444444445,
+          "examples": 360
+        },
+        "source:mme": {
+          "accuracy": 0.8785714285714286,
+          "examples": 280
+        },
+        "source:ocrbench": {
+          "accuracy": 0.7433333333333333,
+          "examples": 300
+        },
+        "source:pope": {
+          "accuracy": 0.84,
+          "examples": 300
+        },
+        "source:tallyqa": {
+          "accuracy": 0.72,
+          "examples": 300
+        },
+        "source:vsr": {
+          "accuracy": 0.7566666666666667,
+          "examples": 300
+        }
+      }
+    },
+    "restore-after-05": {
+      "accuracy": 0.8033783783783783,
+      "accuracy_drop": 0.012837837837837873,
+      "examples": 1480,
+      "groups": {
+        "capability:attribute": {
+          "accuracy": 0.9333333333333333,
+          "examples": 60
+        },
+        "capability:counting": {
+          "accuracy": 0.7416666666666667,
+          "examples": 360
+        },
+        "capability:object": {
+          "accuracy": 0.8833333333333333,
+          "examples": 360
+        },
+        "capability:ocr": {
+          "accuracy": 0.7764705882352941,
+          "examples": 340
+        },
+        "capability:spatial": {
+          "accuracy": 0.7888888888888889,
+          "examples": 360
+        },
+        "source:mme": {
+          "accuracy": 0.8857142857142857,
+          "examples": 280
+        },
+        "source:ocrbench": {
+          "accuracy": 0.78,
+          "examples": 300
+        },
+        "source:pope": {
+          "accuracy": 0.8666666666666667,
+          "examples": 300
+        },
+        "source:tallyqa": {
+          "accuracy": 0.7166666666666667,
+          "examples": 300
+        },
+        "source:vsr": {
+          "accuracy": 0.7733333333333333,
+          "examples": 300
+        }
+      }
+    },
+    "restore-after-09": {
+      "accuracy": 0.8148648648648649,
+      "accuracy_drop": 0.0013513513513513375,
+      "examples": 1480,
+      "groups": {
+        "capability:attribute": {
+          "accuracy": 0.9166666666666666,
+          "examples": 60
+        },
+        "capability:counting": {
+          "accuracy": 0.7666666666666667,
+          "examples": 360
+        },
+        "capability:object": {
+          "accuracy": 0.8861111111111111,
+          "examples": 360
+        },
+        "capability:ocr": {
+          "accuracy": 0.788235294117647,
+          "examples": 340
+        },
+        "capability:spatial": {
+          "accuracy": 0.8,
+          "examples": 360
+        },
+        "source:mme": {
+          "accuracy": 0.8928571428571429,
+          "examples": 280
+        },
+        "source:ocrbench": {
+          "accuracy": 0.79,
+          "examples": 300
+        },
+        "source:pope": {
+          "accuracy": 0.87,
+          "examples": 300
+        },
+        "source:tallyqa": {
+          "accuracy": 0.7466666666666667,
+          "examples": 300
+        },
+        "source:vsr": {
+          "accuracy": 0.78,
+          "examples": 300
+        }
+      }
+    },
+    "restore-after-28": {
+      "accuracy": 0.8162162162162162,
+      "accuracy_drop": 0.0,
+      "examples": 1480,
+      "groups": {
+        "capability:attribute": {
+          "accuracy": 0.9333333333333333,
+          "examples": 60
+        },
+        "capability:counting": {
+          "accuracy": 0.7444444444444445,
+          "examples": 360
+        },
+        "capability:object": {
+          "accuracy": 0.8916666666666667,
+          "examples": 360
+        },
+        "capability:ocr": {
+          "accuracy": 0.8,
+          "examples": 340
+        },
+        "capability:spatial": {
+          "accuracy": 0.8083333333333333,
+          "examples": 360
+        },
+        "source:mme": {
+          "accuracy": 0.8857142857142857,
+          "examples": 280
+        },
+        "source:ocrbench": {
+          "accuracy": 0.81,
+          "examples": 300
+        },
+        "source:pope": {
+          "accuracy": 0.8766666666666667,
+          "examples": 300
+        },
+        "source:tallyqa": {
+          "accuracy": 0.72,
+          "examples": 300
+        },
+        "source:vsr": {
+          "accuracy": 0.7933333333333333,
+          "examples": 300
+        }
+      }
+    }
+  }
+}
