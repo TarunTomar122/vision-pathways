@@ -24,6 +24,13 @@ ANSWER_INSTRUCTIONS = {
 }
 
 
+class VisionBlockIdentity(torch.nn.Module):
+    """Skip a vision block while preserving Qwen's block call signature."""
+
+    def forward(self, hidden_states, **_kwargs):
+        return hidden_states
+
+
 def _nvidia_smi() -> dict:
     fields = "name,driver_version,memory.total,power.limit"
     output = subprocess.check_output(
@@ -114,6 +121,13 @@ class BaselineRunner:
             attn_implementation=config["attention_implementation"],
             low_cpu_mem_usage=True,
         ).to(config["device"])
+        skip_block = config.get("skip_vision_block")
+        if skip_block is not None:
+            skip_block = int(skip_block)
+            blocks = self.model.visual.blocks
+            if not 0 <= skip_block < len(blocks):
+                raise ValueError(f"skip_vision_block must be in [0, {len(blocks) - 1}]")
+            blocks[skip_block] = VisionBlockIdentity()
         self.model.eval()
         self.generation_config = deepcopy(self.model.generation_config)
         self.generation_config.do_sample = bool(config["do_sample"])
