@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Read(//Users/ttomar/.openclaude/**)",
+      "Read(//Users/ttomar/.config/**)",
+      "Bash(printenv)",
+      "Read(//Users/ttomar/**)"
+    ]
+  }
+}
