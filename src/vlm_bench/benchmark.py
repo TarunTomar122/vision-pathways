@@ -32,6 +32,17 @@ class VisionBlockIdentity(torch.nn.Module):
         return hidden_states
 
 
+def validate_skip_blocks(skip_blocks: list[int] | None, block_count: int) -> list[int]:
+    """Normalize and validate a set of vision blocks for dynamic route switching."""
+    normalized = [] if skip_blocks is None else [int(block) for block in skip_blocks]
+    if len(set(normalized)) != len(normalized):
+        raise ValueError("skip_vision_blocks must not contain duplicates")
+    invalid = [block for block in normalized if not 0 <= block < block_count]
+    if invalid:
+        raise ValueError(f"Invalid vision block indices: {invalid}")
+    return sorted(normalized)
+
+
 def _nvidia_smi() -> dict:
     fields = "name,driver_version,memory.total,power.limit"
     output = subprocess.check_output(
@@ -122,40 +133,22 @@ class BaselineRunner:
             attn_implementation=config["attention_implementation"],
             low_cpu_mem_usage=True,
         ).to(config["device"])
-        full_model_parameters = sum(parameter.numel() for parameter in self.model.parameters())
-        full_vision_parameters = sum(parameter.numel() for parameter in self.model.visual.parameters())
-        block_parameters = {
+        self._full_model_parameters = sum(parameter.numel() for parameter in self.model.parameters())
+        self._full_vision_parameters = sum(parameter.numel() for parameter in self.model.visual.parameters())
+        self._block_parameters = {
             str(index): sum(parameter.numel() for parameter in block.parameters())
             for index, block in enumerate(self.model.visual.blocks)
         }
+        # Keep the original modules outside the model tree so hundreds of routes can be tested
+        # without repeatedly loading the complete checkpoint.
+        self._original_vision_blocks = list(self.model.visual.blocks)
         legacy_skip_block = config.get("skip_vision_block")
         skip_blocks = config.get("skip_vision_blocks")
         if legacy_skip_block is not None and skip_blocks is not None:
             raise ValueError("Use either skip_vision_block or skip_vision_blocks, not both")
         if skip_blocks is None and legacy_skip_block is not None:
             skip_blocks = [legacy_skip_block]
-        skip_blocks = [] if skip_blocks is None else [int(block) for block in skip_blocks]
-        if skip_blocks is not None:
-            blocks = self.model.visual.blocks
-            if len(set(skip_blocks)) != len(skip_blocks):
-                raise ValueError("skip_vision_blocks must not contain duplicates")
-            invalid = [block for block in skip_blocks if not 0 <= block < len(blocks)]
-            if invalid:
-                raise ValueError(f"Invalid vision block indices: {invalid}")
-            for block in skip_blocks:
-                blocks[block] = VisionBlockIdentity()
-        active_model_parameters = sum(parameter.numel() for parameter in self.model.parameters())
-        active_vision_parameters = sum(parameter.numel() for parameter in self.model.visual.parameters())
-        self.parameter_counts = {
-            "skipped_vision_blocks": skip_blocks,
-            "full_model": full_model_parameters,
-            "active_model": active_model_parameters,
-            "removed_model": full_model_parameters - active_model_parameters,
-            "full_vision": full_vision_parameters,
-            "active_vision": active_vision_parameters,
-            "removed_vision": full_vision_parameters - active_vision_parameters,
-            "per_vision_block": block_parameters,
-        }
+        self.set_skip_vision_blocks(skip_blocks)
         self.model.eval()
         self.generation_config = deepcopy(self.model.generation_config)
         self.generation_config.do_sample = bool(config["do_sample"])
@@ -166,6 +159,26 @@ class BaselineRunner:
         self.model_load_seconds = time.perf_counter() - load_started
         self.vision_timer = VisionTimer(self.model.visual)
         self.results_path = self.output_dir / "predictions.jsonl"
+
+    def set_skip_vision_blocks(self, skip_blocks: list[int] | None) -> None:
+        """Activate a new identity route while retaining the loaded checkpoint in memory."""
+        normalized = validate_skip_blocks(skip_blocks, len(self._original_vision_blocks))
+        blocks = self.model.visual.blocks
+        for index, original in enumerate(self._original_vision_blocks):
+            blocks[index] = original
+        for block in normalized:
+            blocks[block] = VisionBlockIdentity()
+        removed = sum(self._block_parameters[str(block)] for block in normalized)
+        self.parameter_counts = {
+            "skipped_vision_blocks": normalized,
+            "full_model": self._full_model_parameters,
+            "active_model": self._full_model_parameters - removed,
+            "removed_model": removed,
+            "full_vision": self._full_vision_parameters,
+            "active_vision": self._full_vision_parameters - removed,
+            "removed_vision": removed,
+            "per_vision_block": self._block_parameters,
+        }
 
     def _prompt(self, row: dict) -> str:
         instruction = ANSWER_INSTRUCTIONS[row["answer_format"]]
@@ -252,6 +265,10 @@ class BaselineRunner:
             "peak_reserved_mib": torch.cuda.max_memory_reserved() / 1024**2,
         }
 
+    def predict(self, row: dict) -> dict:
+        """Run one prediction for orchestration scripts that manage their own checkpoints."""
+        return self._predict(row)
+
     def _existing_ids(self) -> set[str]:
         if not self.results_path.exists():
             return set()
@@ -315,6 +332,7 @@ class BaselineRunner:
         del self.model
         del self.processor
         del self.generation_config
+        del self._original_vision_blocks
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()

@@ -20,7 +20,7 @@ baselines before making causal claims.
 
 The project has completed the one-block screen, controlled task-route comparisons at four pruning
 budgets, a locked-clock latency audit, and Phase 2 feature-gap repair. A sealed external benchmark
-is ready but has not been evaluated. The next experiment is interaction-aware route search:
+is ready but has not been evaluated. Phase 3 now runs interaction-aware route search:
 
 1. Build a controlled screening suite and a balanced natural validation suite.
 2. Run Qwen2.5-VL-3B-Instruct with fixed deterministic settings.
@@ -33,7 +33,7 @@ is ready but has not been evaluated. The next experiment is interaction-aware ro
 7. Measure full-versus-pruned states and fit frozen low-rank feature repairs on image-disjoint
    calibration examples. Completed; feature error decreased without reliable answer recovery.
 8. Recompute candidate importance after every selected removal instead of composing independent
-   one-block rankings. This is the next unresolved experiment.
+   one-block rankings. The automated Phase 3 search and pairwise interaction map implement this.
 9. Freeze the complete method before evaluating the sealed 1,250-example external set.
 
 ## Dataset Design
@@ -178,4 +178,5 @@ configuration, and dataset-manifest hash.
 - [Task-specific route analysis](results/task-route-analysis-qwen25-vl-3b/README.md)
 - [Phase 2 feature-gap protocol](docs/phase2_feature_gap_protocol.md)
 - [Phase 2 feature-gap results](results/phase2-feature-gap-qwen25-vl-3b/analysis/README.md)
+- [Phase 3 interaction-search protocol](docs/phase3_interaction_search_protocol.md)
 - [External held-out protocol](docs/external_heldout_protocol.md)

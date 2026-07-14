@@ -124,7 +124,7 @@ poorly; they do not show that the bridge itself is effective.
 ## Current Research Decision
 
 Do not rerun the 8/12/16-block independent-ranking experiment and do not evaluate the sealed set
-yet. The next decisive experiment is interaction-aware route construction on development data.
+yet. Phase 3 implements interaction-aware route construction on development data.
 
 A practical first version is conditional greedy elimination:
 
@@ -135,6 +135,12 @@ A practical first version is conditional greedy elimination:
 5. Recompute all candidate effects after every removal, continuing to eight blocks.
 6. Compare the resulting four- and eight-block routes against the already measured independent,
    generic, random, and contiguous controls.
+
+The implemented search starts from each existing four-block route, expands only within the 16
+least-sensitive blocks for that capability, retains a beam of three routes, and uses 100 fixed
+target examples per capability. The three surviving eight-block routes are evaluated on the
+image-disjoint 404-row development remainder. A separate map evaluates all pairs among each
+capability's ten least-sensitive blocks.
 
 This directly tests the failure discovered above. If interaction-aware search cannot preserve
 accuracy at eight removed blocks materially better than the existing route, vision-block pruning
