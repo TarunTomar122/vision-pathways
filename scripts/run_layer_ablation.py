@@ -99,7 +99,7 @@ def main():
     write_json(args.output_dir / "summary.json", {"blocks": records, "baseline": baseline_groups})
     with (args.output_dir / "heatmap.csv").open("w", newline="", encoding="utf-8") as handle:
         fields = ["block", "accuracy", "accuracy_drop", "vision_latency_median_ms", "vision_speedup_vs_baseline"]
-        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows({field: record[field] for field in fields} for record in records)
     try:

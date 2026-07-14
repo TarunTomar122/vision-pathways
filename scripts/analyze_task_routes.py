@@ -192,7 +192,7 @@ def main() -> None:
         "latency_source",
     ]
     with (args.output_dir / "route_metrics.csv").open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=csv_fields)
+        writer = csv.DictWriter(handle, fieldnames=csv_fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows({**row, "blocks": " ".join(map(str, row["blocks"]))} for row in rows)
 
