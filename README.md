@@ -119,6 +119,9 @@ PYTHONPATH=src .venv/bin/python scripts/run_robust_route_search.py --family gene
 PYTHONPATH=src .venv/bin/python scripts/run_robust_route_search.py --family attribute
 # Run counting/object and OCR/spatial as the next two pairs, then freeze all families.
 PYTHONPATH=src .venv/bin/python scripts/run_robust_route_search.py --finalize
+
+# Optional recovery supervisor for a long-running remote experiment.
+PYTHONPATH=src .venv/bin/python scripts/supervise_robust_route_search.py
 ```
 
 ## Measurements
