@@ -143,7 +143,18 @@ def supervise_once(state: dict, dry_run: bool) -> bool:
             state=state,
             dry_run=dry_run,
         )
-    return analysis.exists()
+    report = ROOT / "site" / "index.html"
+    if analysis.exists() and not report.exists():
+        maybe_launch(
+            key="report",
+            status="pending",
+            needles=("scripts/generate_research_report.py",),
+            command=python_command("scripts/generate_research_report.py"),
+            log_path=Path("logs/robust-report.log"),
+            state=state,
+            dry_run=dry_run,
+        )
+    return report.exists()
 
 
 def main() -> None:

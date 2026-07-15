@@ -122,6 +122,9 @@ PYTHONPATH=src .venv/bin/python scripts/run_robust_route_search.py --finalize
 
 # Optional recovery supervisor for a long-running remote experiment.
 PYTHONPATH=src .venv/bin/python scripts/supervise_robust_route_search.py
+
+# After frozen routes, controls, and analysis complete, render the static research report.
+PYTHONPATH=src .venv/bin/python scripts/generate_research_report.py
 ```
 
 ## Measurements
