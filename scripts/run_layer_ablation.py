@@ -56,7 +56,13 @@ def main():
     parser.add_argument("--limit", type=int)
     parser.add_argument("--suite", choices=["controlled", "external"])
     parser.add_argument("--split", choices=["development", "test"])
+    parser.add_argument(
+        "--summary-stem",
+        help="Optional suffix for aggregate files when concurrent workers share an output directory.",
+    )
     args = parser.parse_args()
+    if args.summary_stem and not args.summary_stem.replace("-", "").replace("_", "").isalnum():
+        raise ValueError("summary-stem may contain only letters, numbers, hyphens, and underscores")
     config = json.loads(args.config.read_text(encoding="utf-8"))
     if "-" in args.blocks:
         first, last = (int(value) for value in args.blocks.split("-", 1))
@@ -96,8 +102,9 @@ def main():
         }
         records.append(record)
         write_json(run_dir / "ablation_record.json", record)
-    write_json(args.output_dir / "summary.json", {"blocks": records, "baseline": baseline_groups})
-    with (args.output_dir / "heatmap.csv").open("w", newline="", encoding="utf-8") as handle:
+    suffix = f"-{args.summary_stem}" if args.summary_stem else ""
+    write_json(args.output_dir / f"summary{suffix}.json", {"blocks": records, "baseline": baseline_groups})
+    with (args.output_dir / f"heatmap{suffix}.csv").open("w", newline="", encoding="utf-8") as handle:
         fields = ["block", "accuracy", "accuracy_drop", "vision_latency_median_ms", "vision_speedup_vs_baseline"]
         writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
@@ -118,10 +125,10 @@ def main():
         ax.set_title("Qwen2.5-VL-3B identity ablation: accuracy drop (percentage points)")
         fig.colorbar(image, ax=ax, label="Accuracy drop (pp)")
         fig.tight_layout()
-        fig.savefig(args.output_dir / "capability_layer_heatmap.png", dpi=180)
+        fig.savefig(args.output_dir / f"capability_layer_heatmap{suffix}.png", dpi=180)
         plt.close(fig)
     except ImportError:
-        (args.output_dir / "heatmap.README").write_text(
+        (args.output_dir / f"heatmap{suffix}.README").write_text(
             "Install matplotlib and rerun the plotting step to render the PNG.\n", encoding="utf-8"
         )
 

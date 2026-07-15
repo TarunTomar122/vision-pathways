@@ -112,6 +112,32 @@ PYTHONPATH=src .venv/bin/python scripts/run_phase3_interaction_search.py
 The full output is `results/phase3-interaction-search-qwen25-vl-3b`. Raw predictions remain
 ignored by Git; compact summaries and the generated report are committed after completion.
 
+If historical route-control predictions are unavailable, validation regenerates the frozen
+task-specific, generic, contiguous, and random controls on the same image-disjoint development
+validation rows. Each control records whether its predictions came from the historical benchmark
+or were regenerated. This recovery behavior does not alter route selection and never reads the
+sealed external held-out set.
+
+One-block prerequisites can use two GPU workers with non-overlapping `--blocks` ranges and a
+shared output directory. Pass a distinct `--summary-stem` to each worker so their aggregate JSON,
+CSV, and heatmap files cannot overwrite one another; block prediction directories are already
+disjoint and resumable.
+
+After preparing V2 data and downloading the pinned model, the recovery launcher validates every
+image hash, passes a one-example GPU smoke gate, runs the baseline, runs two one-block shards, and
+runs two Phase 3 workers with resumable outputs:
+
+```bash
+scripts/run_phase3_recovery.sh
+```
+
+The two-model phases were chosen for a 24 GB RTX 4090. Do not add a third model worker without a
+fresh peak-VRAM measurement.
+
+The recovery one-block sweep uses only the deterministic 500-row Phase 3 search split. Pairwise
+analysis never reads one-block predictions for the 404-row validation remainder, so evaluating
+those extra rows would add 44.7% more prerequisite inference without changing Phase 3 metrics.
+
 ## Decision Rule
 
 Proceed to LoRA plus answer/logit distillation only if the primary interaction-aware eight-block

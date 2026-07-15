@@ -252,11 +252,24 @@ def validate_routes(
         unique_controls = {route["name"]: route for route in controls}
         summary["existing_controls"][capability] = []
         for route in unique_controls.values():
-            predictions = load_map([existing_benchmark_root / route["name"] / "predictions.jsonl"])
+            historical_path = existing_benchmark_root / route["name"] / "predictions.jsonl"
+            if historical_path.exists():
+                predictions = load_map([historical_path])
+                prediction_source = "historical benchmark"
+            else:
+                predictions = run_route(
+                    runner,
+                    tuple(route["skip_vision_blocks"]),
+                    validation_rows,
+                    output_dir / "validation-controls" / route["name"],
+                    f"validation control {capability} {route['name']}",
+                )
+                prediction_source = "regenerated on image-disjoint development validation"
             summary["existing_controls"][capability].append({
                 "name": route["name"],
                 "blocks": route["skip_vision_blocks"],
                 "assignments": route["assignments"],
+                "prediction_source": prediction_source,
                 "validation_metrics": validation_metrics(baseline, predictions, grouped_ids),
             })
         write_json(output_dir / "validation_summary.json", summary)
