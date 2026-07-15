@@ -50,6 +50,19 @@ The command validates image files and hashes after building. The final manifest 
 
 ## Evaluation Freeze
 
+The first frozen external evaluation is recorded in
+`configs/external_frozen_evaluation.json`. It compares exactly four conditions: the full model,
+the discovery-selected generic eight-block route, the Phase 3 capability-conditional eight-block
+routes, and the earlier capability-conditional four-block routes. All use identity substitution
+without repair. The manifest, model revision, prompt, decoding, and scoring implementation are
+fixed by that file. No route may be changed after external predictions are inspected.
+
+The conditions may run concurrently to reduce wall time. Therefore this run supports accuracy
+transfer claims only; its latency values are diagnostic and must not be used for speed claims.
+Existing fixed-clock audits remain the latency evidence.
+
+### General protocol requirements
+
 Before running any model on this set, record the frozen:
 
 1. four-block route for every capability;

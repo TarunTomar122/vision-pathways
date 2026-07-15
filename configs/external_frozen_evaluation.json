@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "status": "frozen before external held-out inference",
+  "manifest": "data/external-heldout-v1/manifests/heldout.jsonl",
+  "manifest_sha256": "c01c93a9f8f007bb21a11c1952ca50fa51bfdaa5232ebbd681a979156cca5a77",
+  "examples": 1250,
+  "capabilities": [
+    "attribute",
+    "counting",
+    "object",
+    "ocr",
+    "spatial"
+  ],
+  "model_config": "configs/baseline_qwen25_vl_3b.json",
+  "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+  "model_revision": "66285546d2b821cf421d4f5eb2576359d3770cd3",
+  "route_operation": "replace each selected vision transformer block with the identity",
+  "repair": "none",
+  "scoring": "src/vlm_bench/scoring.py",
+  "latency_claim": "none; conditions may run concurrently, so timing is diagnostic only",
+  "conditions": {
+    "full": {
+      "kind": "fixed",
+      "blocks": [],
+      "selection": "unmodified baseline"
+    },
+    "generic-k8": {
+      "kind": "fixed",
+      "blocks": [3, 5, 6, 9, 20, 24, 25, 28],
+      "selection": "eight lowest independent single-block macro drops on the discovery benchmark"
+    },
+    "task-k8": {
+      "kind": "conditional",
+      "routes": {
+        "attribute": [3, 6, 8, 9, 16, 20, 22, 25],
+        "counting": [6, 9, 12, 21, 24, 25, 28, 30],
+        "object": [2, 5, 9, 10, 17, 23, 25, 30],
+        "ocr": [4, 5, 9, 11, 25, 26, 27, 28],
+        "spatial": [3, 10, 16, 19, 22, 26, 28, 29]
+      },
+      "selection": "Phase 3 target-capability beam search, frozen after image-disjoint development validation"
+    },
+    "task-k4": {
+      "kind": "conditional",
+      "routes": {
+        "attribute": [8, 9, 20, 25],
+        "counting": [12, 24, 28, 30],
+        "object": [2, 9, 10, 30],
+        "ocr": [4, 5, 9, 28],
+        "spatial": [3, 16, 22, 29]
+      },
+      "selection": "original four-block capability routes selected before Phase 3"
+    }
+  }
+}
