@@ -86,6 +86,14 @@ def main():
     for block in blocks:
         run_dir = args.output_dir / f"block-{block:02d}"
         prediction_path = run_dir / "predictions.jsonl"
+        record_path = run_dir / "ablation_record.json"
+        if record_path.exists():
+            record = json.loads(record_path.read_text(encoding="utf-8"))
+            if record.get("block") != block or record.get("examples") != len(baseline_rows):
+                raise ValueError(f"Existing ablation record is incompatible: {record_path}")
+            records.append(record)
+            print(f"[block {block}] already complete; reusing {record_path}", flush=True)
+            continue
         run_config = {**config, "skip_vision_block": block}
         runner = BaselineRunner(run_config, args.manifest, run_dir, args.data_root)
         try:
@@ -109,7 +117,7 @@ def main():
             "gpu": _nvidia_smi(),
         }
         records.append(record)
-        write_json(run_dir / "ablation_record.json", record)
+        write_json(record_path, record)
     suffix = f"-{args.summary_stem}" if args.summary_stem else ""
     write_json(args.output_dir / f"summary{suffix}.json", {"blocks": records, "baseline": baseline_groups})
     with (args.output_dir / f"heatmap{suffix}.csv").open("w", newline="", encoding="utf-8") as handle:

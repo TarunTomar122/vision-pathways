@@ -77,16 +77,12 @@ def step(state: dict) -> bool:
     if not baseline.exists():
         return False
     if not complete_blocks():
-        launch(
-            "ablation-left",
-            command("scripts/run_layer_ablation.py", "--config", str(MODEL_CONFIG), "--manifest", "data/processed-v2/manifests/all.jsonl", "--data-root", "data/processed-v2", "--baseline-dir", str(ROOT / "baseline"), "--output-dir", str(ABLATION), "--blocks", "0-13", "--split", "development", "--summary-stem", "left"),
-            state,
-        )
-        launch(
-            "ablation-right",
-            command("scripts/run_layer_ablation.py", "--config", str(MODEL_CONFIG), "--manifest", "data/processed-v2/manifests/all.jsonl", "--data-root", "data/processed-v2", "--baseline-dir", str(ROOT / "baseline"), "--output-dir", str(ABLATION), "--blocks", "14-26", "--split", "development", "--summary-stem", "right"),
-            state,
-        )
+        for label, block_range in (("a", "0-8"), ("b", "9-17"), ("c", "18-26")):
+            launch(
+                f"ablation-{label}",
+                command("scripts/run_layer_ablation.py", "--config", str(MODEL_CONFIG), "--manifest", "data/processed-v2/manifests/all.jsonl", "--data-root", "data/processed-v2", "--baseline-dir", str(ROOT / "baseline"), "--output-dir", str(ABLATION), "--blocks", block_range, "--split", "development", "--summary-stem", label),
+                state,
+            )
         return False
     priors = ABLATION / "sensitivity.json"
     if not priors.exists():
