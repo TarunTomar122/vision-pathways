@@ -1,6 +1,6 @@
 {
   "model_id": "HuggingFaceTB/SmolVLM2-2.2B-Instruct",
-  "revision": "70402a4493c18f1a8f3b4be41adf17605fcc0aca",
+  "revision": "482adb537c021c86670beed01cd58990d01e72e4",
   "vision_adapter": "smolvlm",
   "vision_block_count": 27,
   "dtype": "bfloat16",
