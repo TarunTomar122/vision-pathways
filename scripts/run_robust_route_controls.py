@@ -35,8 +35,9 @@ def load_map(path: Path) -> dict[str, dict]:
 def validate_config(config: dict, manifest: Path) -> None:
     if sha256_file(manifest) != config["selection_manifest_sha256"]:
         raise ValueError("Selection manifest does not match the frozen control config")
-    if sorted(int(value) for value in config["conditions"]) != [4, 6, 8]:
-        raise ValueError("Control config must define K4, K6, and K8")
+    expected_k_values = sorted(int(value) for value in config.get("k_values", [4, 6, 8]))
+    if sorted(int(value) for value in config["conditions"]) != expected_k_values:
+        raise ValueError(f"Control config must define exactly K values {expected_k_values}")
     allowed_blocks = tuple(int(value) for value in config.get("allowed_blocks", range(32)))
     if not allowed_blocks:
         raise ValueError("Control config must define at least one allowed vision block")

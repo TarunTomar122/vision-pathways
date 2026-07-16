@@ -55,6 +55,7 @@ def main() -> None:
         "data_root": "data/processed-v2",
         "output_dir": str(args.output_dir),
         "allowed_blocks": list(blocks),
+        "k_values": list(budgets),
         "source_sensitivity_sha256": sha256_file(args.sensitivity),
         "seed_policy": "deterministic independent ranking, contiguous, and three random controls at each K",
         "selection_role": "comparison only; controls cannot change evolved route selection",

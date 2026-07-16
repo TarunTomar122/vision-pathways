@@ -13,16 +13,17 @@ import time
 from vlm_bench.io import write_json
 
 
-ROOT = Path("results/robust-route-search-smolvlm2-2b")
-CONFIG = Path("configs/robust_route_search_smolvlm2_2b.json")
+ROOT = Path("results/robust-route-search-smolvlm2-2b-k6")
+CONFIG = Path("configs/robust_route_search_smolvlm2_2b_k6_lean.json")
 MODEL_CONFIG = Path("configs/baseline_smolvlm2_2b.json")
-PREPARED = Path("data/processed-v2/robust-route-search-smolvlm2-2b/prepared")
+BASELINE_ROOT = Path("results/robust-route-search-smolvlm2-2b/baseline")
+PREPARED = Path("data/processed-v2/robust-route-search-smolvlm2-2b-k6/prepared")
 ABLATION = Path("results/smolvlm2-2b-single-block")
-CONTROLS_CONFIG = Path("configs/robust_route_controls_smolvlm2_2b.json")
+CONTROLS_CONFIG = Path("configs/robust_route_controls_smolvlm2_2b_k6_lean.json")
 FRESH_OCR_MANIFEST = Path("data/fresh-ocr-iiit5k-v1/manifests/heldout.jsonl")
 FRESH_OCR_ROOT = Path("results/fresh-ocr-iiit5k-smolvlm2-2b")
 CROSS_MODEL_REPORT = Path("results/cross-model-replication/report.json")
-LATENCY_SUMMARY = Path("results/fixed-clock-latency-smolvlm2-2b/k8/summary.json")
+LATENCY_SUMMARY = Path("results/fixed-clock-latency-smolvlm2-2b-k6/k6/summary.json")
 # Three simultaneous workers fit in VRAM but reduce aggregate throughput through GPU contention.
 # The two-worker preflight delivered higher measured examples/second.
 LANES = (("generic", "object", "spatial"), ("attribute", "counting", "ocr"))
@@ -73,22 +74,29 @@ def family_complete(family: str) -> bool:
 
 
 def step(state: dict) -> bool:
-    baseline = ROOT / "baseline" / "summary.json"
+    baseline = BASELINE_ROOT / "summary.json"
     if not baseline.exists():
         return False
     if not complete_blocks():
         for label, block_range in (("left", "0-13"), ("right", "14-26")):
             launch(
                 f"ablation-{label}",
-                command("scripts/run_layer_ablation.py", "--config", str(MODEL_CONFIG), "--manifest", "data/processed-v2/manifests/all.jsonl", "--data-root", "data/processed-v2", "--baseline-dir", str(ROOT / "baseline"), "--output-dir", str(ABLATION), "--blocks", block_range, "--split", "development", "--summary-stem", label),
+                command("scripts/run_layer_ablation.py", "--config", str(MODEL_CONFIG), "--manifest", "data/processed-v2/manifests/all.jsonl", "--data-root", "data/processed-v2", "--baseline-dir", str(BASELINE_ROOT), "--output-dir", str(ABLATION), "--blocks", block_range, "--split", "development", "--summary-stem", label),
                 state,
             )
+        return False
+    if not (PREPARED / "summary.json").exists():
+        launch(
+            "prepare-manifests",
+            command("scripts/prepare_robust_route_search.py", "--config", str(CONFIG)),
+            state,
+        )
         return False
     priors = ABLATION / "sensitivity.json"
     if not priors.exists():
         launch(
             "build-priors",
-            command("scripts/build_single_block_priors.py", "--baseline-dir", str(ROOT / "baseline"), "--ablation-dir", str(ABLATION), "--development-manifest", "data/processed-v2/manifests/development.jsonl", "--output-dir", str(ABLATION), "--blocks", "0-26"),
+            command("scripts/build_single_block_priors.py", "--baseline-dir", str(BASELINE_ROOT), "--ablation-dir", str(ABLATION), "--development-manifest", "data/processed-v2/manifests/development.jsonl", "--output-dir", str(ABLATION), "--blocks", "0-26", "--budgets", "6"),
             state,
         )
         return False
@@ -106,7 +114,7 @@ def step(state: dict) -> bool:
     if not CONTROLS_CONFIG.exists():
         launch(
             "freeze-controls",
-            command("scripts/freeze_matched_controls.py", "--model-config", str(MODEL_CONFIG), "--selection-manifest", str(PREPARED / "selection.jsonl"), "--sensitivity", str(priors), "--output", str(CONTROLS_CONFIG), "--output-dir", str(ROOT / "controls")),
+            command("scripts/freeze_matched_controls.py", "--model-config", str(MODEL_CONFIG), "--selection-manifest", str(PREPARED / "selection.jsonl"), "--sensitivity", str(priors), "--output", str(CONTROLS_CONFIG), "--output-dir", str(ROOT / "controls"), "--budgets", "6"),
             state,
         )
         return False
@@ -115,7 +123,7 @@ def step(state: dict) -> bool:
         return False
     analysis = ROOT / "analysis" / "analysis.json"
     if not analysis.exists():
-        launch("analysis", command("scripts/analyze_robust_route_search.py", "--root", str(ROOT), "--manifest", str(PREPARED / "selection.jsonl")), state)
+        launch("analysis", command("scripts/analyze_robust_route_search.py", "--root", str(ROOT), "--manifest", str(PREPARED / "selection.jsonl"), "--budgets", "6"), state)
         return False
     if FRESH_OCR_MANIFEST.exists() and not (FRESH_OCR_ROOT / "analysis.json").exists():
         launch(
@@ -127,7 +135,7 @@ def step(state: dict) -> bool:
     if not FRESH_OCR_MANIFEST.exists():
         return False
     if not LATENCY_SUMMARY.exists():
-        launch("fixed-clock-latency", command("scripts/run_smolvlm2_fixed_clock_latency.py", "--frozen-routes", str(frozen)), state)
+        launch("fixed-clock-latency", command("scripts/run_smolvlm2_fixed_clock_latency.py", "--frozen-routes", str(frozen), "--output-dir", "results/fixed-clock-latency-smolvlm2-2b-k6", "--budgets", "6"), state)
         return False
     if not CROSS_MODEL_REPORT.exists():
         launch("cross-model-report", command("scripts/analyze_cross_model_replication.py"), state)

@@ -574,8 +574,11 @@ class FamilyJob:
 
     def run(self, manifest_for_runner: Path, data_root: Path) -> dict:
         budgets = tuple(int(value) for value in nested(self.config, "route.k_values", "budgets", default=[]))
-        if budgets != (4, 6, 8):
-            raise ValueError(f"Frozen route.k_values must be [4, 6, 8]; got {list(budgets)}")
+        if budgets not in ((4, 6, 8), (6,)):
+            raise ValueError(
+                "Frozen route.k_values must be [4, 6, 8] for the full protocol "
+                f"or [6] for the targeted replication; got {list(budgets)}"
+            )
         seeds = tuple(int(value) for value in nested(self.config, "optimizer.seeds", "seeds", default=[]))
         if len(seeds) != 3 or len(set(seeds)) != 3:
             raise ValueError(f"Frozen optimizer must contain exactly three unique seeds; got {seeds}")

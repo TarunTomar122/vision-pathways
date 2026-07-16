@@ -136,7 +136,7 @@ def write_report(output_dir: Path, analysis: dict) -> None:
         "|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     full = analysis["full"]["overall"]["accuracy"]
-    for raw_k, result in analysis["budgets"].items():
+    for raw_k, result in sorted(analysis["budgets"].items(), key=lambda item: int(item[0])):
         conditions = result["conditions"]
         random_values = [conditions[f"random-{index}"]["overall"]["accuracy"] for index in range(3)]
         advantage = result["comparisons"]["evolved_task_minus_evolved_generic"]["overall"]
@@ -152,7 +152,7 @@ def write_report(output_dir: Path, analysis: dict) -> None:
             f"({100 * min(random_values):.2f}-{100 * max(random_values):.2f}%) |"
         )
     lines.extend(["", "## Capability-Specific Advantage", ""])
-    for raw_k, result in analysis["budgets"].items():
+    for raw_k, result in sorted(analysis["budgets"].items(), key=lambda item: int(item[0])):
         lines.extend([
             f"### K{raw_k}",
             "",
@@ -185,6 +185,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path("results/robust-route-search-qwen25-vl-3b"))
     parser.add_argument("--manifest", type=Path, default=Path("data/processed-v2/robust-route-search/prepared/selection.jsonl"))
+    parser.add_argument("--budgets", default="4,6,8", help="Comma-separated frozen K values")
     parser.add_argument("--bootstrap-iterations", type=int, default=10_000)
     args = parser.parse_args()
     # external_eval currently freezes 10,000 iterations; reject a misleading CLI override.
@@ -210,7 +211,10 @@ def main() -> None:
         "full": aggregate(rows, baseline, baseline),
         "budgets": {},
     }
-    for k in (4, 6, 8):
+    budgets = tuple(int(value) for value in args.budgets.split(",") if value)
+    if not budgets or len(set(budgets)) != len(budgets):
+        raise ValueError("--budgets must contain unique positive integers")
+    for k in budgets:
         generic_blocks = frozen["families"]["generic"]["budgets"][str(k)]["blocks"]
         evolved_generic = cached_route(family_caches["generic"], generic_blocks, wanted_ids)
         task_routes = {

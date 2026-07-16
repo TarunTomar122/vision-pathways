@@ -23,14 +23,18 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, default=Path("results/fixed-clock-latency-smolvlm2-2b"))
     parser.add_argument("--graphics-mhz", type=int, default=2700)
     parser.add_argument("--memory-mhz", type=int, default=10501)
+    parser.add_argument("--budgets", default="4,6,8", help="Comma-separated frozen generic-route K values")
     args = parser.parse_args()
     frozen = json.loads(args.frozen_routes.read_text(encoding="utf-8"))
     if frozen.get("status") != "frozen":
         raise ValueError("Routes must be frozen before latency measurement")
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    budgets = tuple(int(value) for value in args.budgets.split(",") if value)
+    if not budgets or len(set(budgets)) != len(budgets):
+        raise ValueError("--budgets must contain unique positive integers")
     candidates = [
         {"name": f"frozen-generic-k{k}", "skip_vision_blocks": frozen["families"]["generic"]["budgets"][str(k)]["blocks"], "assignments": [{"route_type": "frozen_generic", "budget": k}]}
-        for k in (4, 6, 8)
+        for k in budgets
     ]
     candidate_path = args.output_dir / "candidates.json"
     write_json(candidate_path, candidates)
@@ -42,7 +46,7 @@ def main() -> None:
         clock_log["set"].append(run(["sudo", "-n", "nvidia-smi", "-lmc", f"{args.memory_mhz},{args.memory_mhz}"]))
         clock_log["set"].append(run(["nvidia-smi", "--query-gpu=name,clocks.current.graphics,clocks.current.memory", "--format=csv,noheader,nounits"]))
         write_json(args.output_dir / "clock-control.json", clock_log)
-        for budget in (4, 6, 8):
+        for budget in budgets:
             destination = args.output_dir / f"k{budget}"
             if (destination / "summary.json").exists():
                 continue

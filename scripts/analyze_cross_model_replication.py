@@ -17,7 +17,7 @@ def load(path: Path) -> dict:
 
 def model_summary(name: str, analysis: dict) -> dict:
     output = {"model": name, "full_accuracy": analysis["full"]["overall"]["accuracy"], "budgets": {}}
-    for k in ("4", "6", "8"):
+    for k in sorted(analysis["budgets"], key=int):
         result = analysis["budgets"][k]
         comparison = result["comparisons"]["evolved_task_minus_evolved_generic"]["overall"]
         output["budgets"][k] = {
@@ -42,8 +42,9 @@ def main() -> None:
     smol = model_summary("SmolVLM2-2.2B-Instruct", load(args.smol))
     fresh = load(args.fresh_ocr)
     latency = {}
-    for k in (4, 6, 8):
-        summary = load(args.latency_root / f"k{k}" / "summary.json")
+    for path in sorted(args.latency_root.glob("k*/summary.json"), key=lambda item: int(item.parent.name[1:])):
+        k = int(path.parent.name[1:])
+        summary = load(path)
         route = summary["routes"][0]
         latency[str(k)] = {
             "baseline_vision_encoder_median_ms": summary["baseline_vision_encoder_median_ms"],
@@ -86,7 +87,7 @@ def main() -> None:
         "|---:|---:|---:|",
         *[
             f"| K{k} | {latency[str(k)]['vision_speedup_percent']:+.2f}% | {latency[str(k)]['total_speedup_percent']:+.2f}% |"
-            for k in (4, 6, 8)
+            for k in sorted((int(value) for value in latency))
         ],
         "",
         f"SmolVLM2 IIIT5K OCR K6: frozen OCR route minus frozen generic route = {fresh_advantage['mean_pp']:+.2f} pp "
