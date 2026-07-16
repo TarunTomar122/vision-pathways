@@ -22,6 +22,7 @@ CONTROLS_CONFIG = Path("configs/robust_route_controls_smolvlm2_2b.json")
 FRESH_OCR_MANIFEST = Path("data/fresh-ocr-iiit5k-v1/manifests/heldout.jsonl")
 FRESH_OCR_ROOT = Path("results/fresh-ocr-iiit5k-smolvlm2-2b")
 CROSS_MODEL_REPORT = Path("results/cross-model-replication/report.json")
+LATENCY_SUMMARY = Path("results/fixed-clock-latency-smolvlm2-2b/k8/summary.json")
 LANES = (("generic", "object", "spatial"), ("attribute", "counting", "ocr"))
 
 
@@ -129,6 +130,9 @@ def step(state: dict) -> bool:
         return False
     if not CROSS_MODEL_REPORT.exists():
         launch("cross-model-report", command("scripts/analyze_cross_model_replication.py"), state)
+        return False
+    if not LATENCY_SUMMARY.exists():
+        launch("fixed-clock-latency", command("scripts/run_smolvlm2_fixed_clock_latency.py", "--frozen-routes", str(frozen)), state)
         return False
     return True
 
