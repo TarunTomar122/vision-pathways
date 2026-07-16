@@ -21,6 +21,7 @@ ABLATION = Path("results/smolvlm2-2b-single-block")
 CONTROLS_CONFIG = Path("configs/robust_route_controls_smolvlm2_2b.json")
 FRESH_OCR_MANIFEST = Path("data/fresh-ocr-iiit5k-v1/manifests/heldout.jsonl")
 FRESH_OCR_ROOT = Path("results/fresh-ocr-iiit5k-smolvlm2-2b")
+CROSS_MODEL_REPORT = Path("results/cross-model-replication/report.json")
 LANES = (("generic", "object", "spatial"), ("attribute", "counting", "ocr"))
 
 
@@ -124,7 +125,12 @@ def step(state: dict) -> bool:
             state,
         )
         return False
-    return FRESH_OCR_MANIFEST.exists()
+    if not FRESH_OCR_MANIFEST.exists():
+        return False
+    if not CROSS_MODEL_REPORT.exists():
+        launch("cross-model-report", command("scripts/analyze_cross_model_replication.py"), state)
+        return False
+    return True
 
 
 def main() -> None:
