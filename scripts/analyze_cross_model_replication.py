@@ -41,6 +41,8 @@ def main() -> None:
     qwen = model_summary("Qwen2.5-VL-3B-Instruct", load(args.qwen))
     smol = model_summary("SmolVLM2-2.2B-Instruct", load(args.smol))
     fresh = load(args.fresh_ocr)
+    clock_control = load(args.latency_root / "clock-control.json")
+    latency_measurement_mode = clock_control.get("measurement_mode", "unknown")
     latency = {}
     for path in sorted(args.latency_root.glob("k*/summary.json"), key=lambda item: int(item.parent.name[1:])):
         k = int(path.parent.name[1:])
@@ -57,6 +59,7 @@ def main() -> None:
         "models": [qwen, smol],
         "fresh_smol_ocr_transfer": fresh,
         "smol_fixed_clock_generic_latency": latency,
+        "smol_latency_measurement_mode": latency_measurement_mode,
         "interpretation_rule": "A positive task-minus-generic value favors the capability-conditional policy at the same K. Intervals crossing zero are not treated as confirmed advantages.",
     }
     args.output_dir.mkdir(parents=True, exist_ok=True)
@@ -86,7 +89,9 @@ def main() -> None:
         "",
         "## Fresh OCR Transfer",
         "",
-        "## Fixed-Clock SmolVLM2 Generic-Route Latency",
+        "## SmolVLM2 Generic-Route Latency",
+        "",
+        f"Measurement mode: `{latency_measurement_mode}`.",
         "",
         "| Budget | Vision speedup | End-to-end speedup |",
         "|---:|---:|---:|",
@@ -100,7 +105,7 @@ def main() -> None:
         "",
         "## Evidence Boundary",
         "",
-        "The matched-K tables are image-disjoint method-selection evidence on processed-v2. The IIIT5K value is a separate sealed OCR source-transfer test and was excluded from every route-selection step. The latency table is batch-size-one RTX 4090 evidence under locked clocks, not a mobile-device measurement. Neither table supports a universal capability-routing claim unless the corresponding uncertainty interval excludes zero.",
+        "The matched-K tables are image-disjoint method-selection evidence on processed-v2. The IIIT5K value is a separate sealed OCR source-transfer test and was excluded from every route-selection step. The latency table is batch-size-one RTX 4090 evidence, not a mobile-device measurement. If the measurement mode is unlocked, the cloud provider denied clock control and the measurement is only a same-VM comparison. Neither table supports a universal capability-routing claim unless the corresponding uncertainty interval excludes zero.",
         "",
     ])
     (args.output_dir / "README.md").write_text(markdown, encoding="utf-8")

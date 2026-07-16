@@ -24,6 +24,11 @@ def main() -> None:
     parser.add_argument("--graphics-mhz", type=int, default=2700)
     parser.add_argument("--memory-mhz", type=int, default=10501)
     parser.add_argument("--budgets", default="4,6,8", help="Comma-separated frozen generic-route K values")
+    parser.add_argument(
+        "--allow-unlocked-fallback",
+        action="store_true",
+        help="Measure on the same idle VM if the provider denies GPU clock control",
+    )
     args = parser.parse_args()
     frozen = json.loads(args.frozen_routes.read_text(encoding="utf-8"))
     if frozen.get("status") != "frozen":
@@ -38,13 +43,33 @@ def main() -> None:
     ]
     candidate_path = args.output_dir / "candidates.json"
     write_json(candidate_path, candidates)
-    clock_log = {"requested_graphics_mhz": args.graphics_mhz, "requested_memory_mhz": args.memory_mhz, "set": [], "restore": []}
+    clock_log = {
+        "requested_graphics_mhz": args.graphics_mhz,
+        "requested_memory_mhz": args.memory_mhz,
+        "measurement_mode": "pending",
+        "set": [],
+        "restore": [],
+    }
     write_json(args.output_dir / "clock-control.json", clock_log)
+    clocks_locked = False
     try:
-        clock_log["set"].append(run(["sudo", "-n", "nvidia-smi", "-pm", "1"]))
-        clock_log["set"].append(run(["sudo", "-n", "nvidia-smi", "-lgc", f"{args.graphics_mhz},{args.graphics_mhz}"]))
-        clock_log["set"].append(run(["sudo", "-n", "nvidia-smi", "-lmc", f"{args.memory_mhz},{args.memory_mhz}"]))
-        clock_log["set"].append(run(["nvidia-smi", "--query-gpu=name,clocks.current.graphics,clocks.current.memory", "--format=csv,noheader,nounits"]))
+        try:
+            clock_log["set"].append(run(["sudo", "-n", "nvidia-smi", "-pm", "1"]))
+            clock_log["set"].append(run(["sudo", "-n", "nvidia-smi", "-lgc", f"{args.graphics_mhz},{args.graphics_mhz}"]))
+            clock_log["set"].append(run(["sudo", "-n", "nvidia-smi", "-lmc", f"{args.memory_mhz},{args.memory_mhz}"]))
+            clock_log["set"].append(run(["nvidia-smi", "--query-gpu=name,clocks.current.graphics,clocks.current.memory", "--format=csv,noheader,nounits"]))
+            clock_log["measurement_mode"] = "locked_clocks"
+            clocks_locked = True
+        except subprocess.CalledProcessError as error:
+            if not args.allow_unlocked_fallback:
+                raise
+            clock_log["measurement_mode"] = "unlocked_same_vm_fallback"
+            clock_log["clock_lock_error"] = {
+                "command": error.cmd,
+                "returncode": error.returncode,
+                "stdout": error.stdout,
+                "stderr": error.stderr,
+            }
         write_json(args.output_dir / "clock-control.json", clock_log)
         for budget in budgets:
             destination = args.output_dir / f"k{budget}"
@@ -62,11 +87,12 @@ def main() -> None:
                 "--repeats", "5",
             ], check=True)
     finally:
-        for command in (["sudo", "-n", "nvidia-smi", "-rgc"], ["sudo", "-n", "nvidia-smi", "-rmc"]):
-            try:
-                clock_log["restore"].append(run(command))
-            except subprocess.CalledProcessError as error:
-                clock_log["restore"].append({"command": command, "returncode": error.returncode, "stdout": error.stdout, "stderr": error.stderr})
+        if clocks_locked:
+            for command in (["sudo", "-n", "nvidia-smi", "-rgc"], ["sudo", "-n", "nvidia-smi", "-rmc"]):
+                try:
+                    clock_log["restore"].append(run(command))
+                except subprocess.CalledProcessError as error:
+                    clock_log["restore"].append({"command": command, "returncode": error.returncode, "stdout": error.stdout, "stderr": error.stderr})
         write_json(args.output_dir / "clock-control.json", clock_log)
 
 

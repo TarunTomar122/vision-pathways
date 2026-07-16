@@ -136,7 +136,7 @@ def step(state: dict) -> bool:
     if not FRESH_OCR_MANIFEST.exists():
         return False
     if not LATENCY_SUMMARY.exists():
-        launch("fixed-clock-latency", command("scripts/run_smolvlm2_fixed_clock_latency.py", "--frozen-routes", str(frozen), "--output-dir", "results/fixed-clock-latency-smolvlm2-2b-k4", "--budgets", "4"), state)
+        launch("fixed-clock-latency", command("scripts/run_smolvlm2_fixed_clock_latency.py", "--frozen-routes", str(frozen), "--output-dir", "results/fixed-clock-latency-smolvlm2-2b-k4", "--budgets", "4", "--allow-unlocked-fallback"), state)
         return False
     if not CROSS_MODEL_REPORT.exists():
         launch("cross-model-report", command("scripts/analyze_cross_model_replication.py"), state)
