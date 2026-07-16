@@ -124,7 +124,7 @@ def step(state: dict) -> bool:
         return False
     analysis = ROOT / "analysis" / "analysis.json"
     if not analysis.exists():
-        launch("analysis", command("scripts/analyze_robust_route_search.py", "--root", str(ROOT), "--manifest", str(PREPARED / "selection.jsonl"), "--budgets", "4"), state)
+        launch("analysis", command("scripts/analyze_robust_route_search.py", "--root", str(ROOT), "--manifest", str(PREPARED / "selection.jsonl"), "--baseline-predictions", str(BASELINE_ROOT / "predictions.jsonl"), "--budgets", "4"), state)
         return False
     if FRESH_OCR_MANIFEST.exists() and not (FRESH_OCR_ROOT / "analysis.json").exists():
         launch(

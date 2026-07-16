@@ -185,6 +185,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path("results/robust-route-search-qwen25-vl-3b"))
     parser.add_argument("--manifest", type=Path, default=Path("data/processed-v2/robust-route-search/prepared/selection.jsonl"))
+    parser.add_argument(
+        "--baseline-predictions",
+        type=Path,
+        help="Optional shared baseline predictions; defaults to ROOT/baseline/predictions.jsonl",
+    )
     parser.add_argument("--budgets", default="4,6,8", help="Comma-separated frozen K values")
     parser.add_argument("--bootstrap-iterations", type=int, default=10_000)
     args = parser.parse_args()
@@ -194,7 +199,8 @@ def main() -> None:
 
     rows = list(read_jsonl(args.manifest))
     wanted_ids = {str(row["id"]) for row in rows}
-    baseline_all = prediction_map(args.root / "baseline" / "predictions.jsonl")
+    baseline_path = args.baseline_predictions or args.root / "baseline" / "predictions.jsonl"
+    baseline_all = prediction_map(baseline_path)
     baseline = {row_id: baseline_all[row_id] for row_id in wanted_ids}
     frozen = json.loads((args.root / "frozen_routes.json").read_text(encoding="utf-8"))
     controls_state = json.loads((args.root / "controls" / "state.json").read_text(encoding="utf-8"))
