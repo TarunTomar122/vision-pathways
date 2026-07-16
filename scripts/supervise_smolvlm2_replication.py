@@ -23,9 +23,9 @@ FRESH_OCR_MANIFEST = Path("data/fresh-ocr-iiit5k-v1/manifests/heldout.jsonl")
 FRESH_OCR_ROOT = Path("results/fresh-ocr-iiit5k-smolvlm2-2b")
 CROSS_MODEL_REPORT = Path("results/cross-model-replication/report.json")
 LATENCY_SUMMARY = Path("results/fixed-clock-latency-smolvlm2-2b/k8/summary.json")
-# A SmolVLM2 worker consumed about 5.9 GiB during the two-worker ablation
-# preflight, leaving sufficient measured headroom for three concurrent workers.
-LANES = (("generic", "object"), ("attribute", "counting"), ("spatial", "ocr"))
+# Three simultaneous workers fit in VRAM but reduce aggregate throughput through GPU contention.
+# The two-worker preflight delivered higher measured examples/second.
+LANES = (("generic", "object", "spatial"), ("attribute", "counting", "ocr"))
 
 
 def running(*needles: str) -> bool:
@@ -77,7 +77,7 @@ def step(state: dict) -> bool:
     if not baseline.exists():
         return False
     if not complete_blocks():
-        for label, block_range in (("a", "0-8"), ("b", "9-17"), ("c", "18-26")):
+        for label, block_range in (("left", "0-13"), ("right", "14-26")):
             launch(
                 f"ablation-{label}",
                 command("scripts/run_layer_ablation.py", "--config", str(MODEL_CONFIG), "--manifest", "data/processed-v2/manifests/all.jsonl", "--data-root", "data/processed-v2", "--baseline-dir", str(ROOT / "baseline"), "--output-dir", str(ABLATION), "--blocks", block_range, "--split", "development", "--summary-stem", label),
