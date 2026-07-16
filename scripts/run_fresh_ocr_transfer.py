@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evaluate frozen SmolVLM2 K6 routes on the sealed IIIT5K OCR transfer set."""
+"""Evaluate frozen SmolVLM2 routes on the sealed IIIT5K OCR transfer set."""
 
 from __future__ import annotations
 
@@ -18,6 +18,7 @@ def main() -> None:
     parser.add_argument("--model-config", type=Path, default=Path("configs/baseline_smolvlm2_2b.json"))
     parser.add_argument("--manifest", type=Path, default=Path("data/fresh-ocr-iiit5k-v1/manifests/heldout.jsonl"))
     parser.add_argument("--output-dir", type=Path, default=Path("results/fresh-ocr-iiit5k-smolvlm2-2b"))
+    parser.add_argument("--budget", type=int, default=6)
     args = parser.parse_args()
     frozen = json.loads(args.frozen_routes.read_text(encoding="utf-8"))
     if frozen.get("status") != "frozen":
@@ -26,9 +27,12 @@ def main() -> None:
     if not rows or {row["capability"] for row in rows} != {"ocr"}:
         raise ValueError("Expected a non-empty OCR-only sealed manifest")
     expected_ids = {str(row["id"]) for row in rows}
-    generic = frozen["families"]["generic"]["budgets"]["6"]["blocks"]
-    ocr = frozen["families"]["ocr"]["budgets"]["6"]["blocks"]
-    conditions = {"full": [], "generic-k6": generic, "ocr-k6": ocr}
+    if args.budget <= 0:
+        raise ValueError("--budget must be positive")
+    budget_key = str(args.budget)
+    generic = frozen["families"]["generic"]["budgets"][budget_key]["blocks"]
+    ocr = frozen["families"]["ocr"]["budgets"][budget_key]["blocks"]
+    conditions = {"full": [], f"generic-k{args.budget}": generic, f"ocr-k{args.budget}": ocr}
     config = json.loads(args.model_config.read_text(encoding="utf-8"))
     args.output_dir.mkdir(parents=True, exist_ok=True)
     runner = BaselineRunner(config, args.manifest, args.output_dir / "runtime", args.manifest.parent.parent)
@@ -62,9 +66,11 @@ def main() -> None:
         "status": "sealed fresh OCR transfer; frozen routes only",
         "manifest_sha256": sha256_file(args.manifest),
         "frozen_routes_sha256": sha256_file(args.frozen_routes),
-        "routes": {"generic-k6": generic, "ocr-k6": ocr},
+        "routes": {f"generic-k{args.budget}": generic, f"ocr-k{args.budget}": ocr},
         "conditions": {name: paired_accuracy(maps["full"], values, ordered_ids) for name, values in maps.items()},
-        "ocr_minus_generic_k6": bootstrap_advantage(maps["ocr-k6"], maps["generic-k6"], ordered_ids, 20260716),
+        f"ocr_minus_generic_k{args.budget}": bootstrap_advantage(
+            maps[f"ocr-k{args.budget}"], maps[f"generic-k{args.budget}"], ordered_ids, 20260716
+        ),
     }
     write_json(args.output_dir / "analysis.json", analysis)
 

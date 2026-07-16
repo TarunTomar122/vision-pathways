@@ -13,17 +13,17 @@ import time
 from vlm_bench.io import write_json
 
 
-ROOT = Path("results/robust-route-search-smolvlm2-2b-k6")
-CONFIG = Path("configs/robust_route_search_smolvlm2_2b_k6_lean.json")
+ROOT = Path("results/robust-route-search-smolvlm2-2b-k4")
+CONFIG = Path("configs/robust_route_search_smolvlm2_2b_k4_lean.json")
 MODEL_CONFIG = Path("configs/baseline_smolvlm2_2b.json")
 BASELINE_ROOT = Path("results/robust-route-search-smolvlm2-2b/baseline")
-PREPARED = Path("data/processed-v2/robust-route-search-smolvlm2-2b-k6/prepared")
+PREPARED = Path("data/processed-v2/robust-route-search-smolvlm2-2b-k4/prepared")
 ABLATION = Path("results/smolvlm2-2b-single-block")
-CONTROLS_CONFIG = Path("configs/robust_route_controls_smolvlm2_2b_k6_lean.json")
+CONTROLS_CONFIG = Path("configs/robust_route_controls_smolvlm2_2b_k4_lean.json")
 FRESH_OCR_MANIFEST = Path("data/fresh-ocr-iiit5k-v1/manifests/heldout.jsonl")
-FRESH_OCR_ROOT = Path("results/fresh-ocr-iiit5k-smolvlm2-2b")
-CROSS_MODEL_REPORT = Path("results/cross-model-replication/report.json")
-LATENCY_SUMMARY = Path("results/fixed-clock-latency-smolvlm2-2b-k6/k6/summary.json")
+FRESH_OCR_ROOT = Path("results/fresh-ocr-iiit5k-smolvlm2-2b-k4")
+CROSS_MODEL_REPORT = Path("results/cross-model-replication-k4/report.json")
+LATENCY_SUMMARY = Path("results/fixed-clock-latency-smolvlm2-2b-k4/k4/summary.json")
 # Three simultaneous workers fit in VRAM but reduce aggregate throughput through GPU contention.
 # The two-worker preflight delivered higher measured examples/second.
 LANES = (("generic", "object", "spatial"), ("attribute", "counting", "ocr"))
@@ -96,7 +96,7 @@ def step(state: dict) -> bool:
     if not priors.exists():
         launch(
             "build-priors",
-            command("scripts/build_single_block_priors.py", "--baseline-dir", str(BASELINE_ROOT), "--ablation-dir", str(ABLATION), "--development-manifest", "data/processed-v2/manifests/development.jsonl", "--output-dir", str(ABLATION), "--blocks", "0-26", "--budgets", "6"),
+            command("scripts/build_single_block_priors.py", "--baseline-dir", str(BASELINE_ROOT), "--ablation-dir", str(ABLATION), "--development-manifest", "data/processed-v2/manifests/development.jsonl", "--output-dir", str(ABLATION), "--blocks", "0-26", "--budgets", "4"),
             state,
         )
         return False
@@ -114,7 +114,7 @@ def step(state: dict) -> bool:
     if not CONTROLS_CONFIG.exists():
         launch(
             "freeze-controls",
-            command("scripts/freeze_matched_controls.py", "--model-config", str(MODEL_CONFIG), "--selection-manifest", str(PREPARED / "selection.jsonl"), "--sensitivity", str(priors), "--output", str(CONTROLS_CONFIG), "--output-dir", str(ROOT / "controls"), "--budgets", "6"),
+            command("scripts/freeze_matched_controls.py", "--model-config", str(MODEL_CONFIG), "--selection-manifest", str(PREPARED / "selection.jsonl"), "--sensitivity", str(priors), "--output", str(CONTROLS_CONFIG), "--output-dir", str(ROOT / "controls"), "--budgets", "4"),
             state,
         )
         return False
@@ -123,19 +123,19 @@ def step(state: dict) -> bool:
         return False
     analysis = ROOT / "analysis" / "analysis.json"
     if not analysis.exists():
-        launch("analysis", command("scripts/analyze_robust_route_search.py", "--root", str(ROOT), "--manifest", str(PREPARED / "selection.jsonl"), "--budgets", "6"), state)
+        launch("analysis", command("scripts/analyze_robust_route_search.py", "--root", str(ROOT), "--manifest", str(PREPARED / "selection.jsonl"), "--budgets", "4"), state)
         return False
     if FRESH_OCR_MANIFEST.exists() and not (FRESH_OCR_ROOT / "analysis.json").exists():
         launch(
             "fresh-ocr-transfer",
-            command("scripts/run_fresh_ocr_transfer.py", "--frozen-routes", str(frozen), "--manifest", str(FRESH_OCR_MANIFEST), "--output-dir", str(FRESH_OCR_ROOT)),
+            command("scripts/run_fresh_ocr_transfer.py", "--frozen-routes", str(frozen), "--manifest", str(FRESH_OCR_MANIFEST), "--output-dir", str(FRESH_OCR_ROOT), "--budget", "4"),
             state,
         )
         return False
     if not FRESH_OCR_MANIFEST.exists():
         return False
     if not LATENCY_SUMMARY.exists():
-        launch("fixed-clock-latency", command("scripts/run_smolvlm2_fixed_clock_latency.py", "--frozen-routes", str(frozen), "--output-dir", "results/fixed-clock-latency-smolvlm2-2b-k6", "--budgets", "6"), state)
+        launch("fixed-clock-latency", command("scripts/run_smolvlm2_fixed_clock_latency.py", "--frozen-routes", str(frozen), "--output-dir", "results/fixed-clock-latency-smolvlm2-2b-k4", "--budgets", "4"), state)
         return False
     if not CROSS_MODEL_REPORT.exists():
         launch("cross-model-report", command("scripts/analyze_cross_model_replication.py"), state)

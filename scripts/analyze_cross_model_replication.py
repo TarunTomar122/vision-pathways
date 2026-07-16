@@ -33,10 +33,10 @@ def model_summary(name: str, analysis: dict) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--qwen", type=Path, default=Path("results/robust-route-search-qwen25-vl-3b/analysis/analysis.json"))
-    parser.add_argument("--smol", type=Path, default=Path("results/robust-route-search-smolvlm2-2b/analysis/analysis.json"))
-    parser.add_argument("--fresh-ocr", type=Path, default=Path("results/fresh-ocr-iiit5k-smolvlm2-2b/analysis.json"))
-    parser.add_argument("--latency-root", type=Path, default=Path("results/fixed-clock-latency-smolvlm2-2b"))
-    parser.add_argument("--output-dir", type=Path, default=Path("results/cross-model-replication"))
+    parser.add_argument("--smol", type=Path, default=Path("results/robust-route-search-smolvlm2-2b-k4/analysis/analysis.json"))
+    parser.add_argument("--fresh-ocr", type=Path, default=Path("results/fresh-ocr-iiit5k-smolvlm2-2b-k4/analysis.json"))
+    parser.add_argument("--latency-root", type=Path, default=Path("results/fixed-clock-latency-smolvlm2-2b-k4"))
+    parser.add_argument("--output-dir", type=Path, default=Path("results/cross-model-replication-k4"))
     args = parser.parse_args()
     qwen = model_summary("Qwen2.5-VL-3B-Instruct", load(args.qwen))
     smol = model_summary("SmolVLM2-2.2B-Instruct", load(args.smol))
@@ -69,7 +69,12 @@ def main() -> None:
                 f"{100 * values['task_accuracy']:.2f}% | {values['task_minus_generic_pp']:+.2f} pp | "
                 f"[{values['ci95_low_pp']:.2f}, {values['ci95_high_pp']:.2f}] |"
             )
-    fresh_advantage = fresh["ocr_minus_generic_k6"]
+    fresh_keys = sorted(key for key in fresh if key.startswith("ocr_minus_generic_k"))
+    if len(fresh_keys) != 1:
+        raise ValueError("Fresh OCR analysis must define exactly one OCR-minus-generic budget")
+    fresh_key = fresh_keys[0]
+    fresh_budget = fresh_key.removeprefix("ocr_minus_generic_k")
+    fresh_advantage = fresh[fresh_key]
     markdown = "\n".join([
         "# Cross-Model Vision-Block Route Replication",
         "",
@@ -90,7 +95,7 @@ def main() -> None:
             for k in sorted((int(value) for value in latency))
         ],
         "",
-        f"SmolVLM2 IIIT5K OCR K6: frozen OCR route minus frozen generic route = {fresh_advantage['mean_pp']:+.2f} pp "
+        f"SmolVLM2 IIIT5K OCR K{fresh_budget}: frozen OCR route minus frozen generic route = {fresh_advantage['mean_pp']:+.2f} pp "
         f"with paired 95% interval [{fresh_advantage['ci95_low_pp']:.2f}, {fresh_advantage['ci95_high_pp']:.2f}].",
         "",
         "## Evidence Boundary",
