@@ -19,8 +19,8 @@
     "selection_status": "method-selection evidence only; SmolVLM2 single-block discovery is development-only"
   },
   "priors": {
-    "sensitivity": "results/smolvlm2-2b-single-block/sensitivity.json",
-    "routes": "results/smolvlm2-2b-single-block/routes.json",
+    "sensitivity": "results/smolvlm2-2b-k4-priors/sensitivity.json",
+    "routes": "results/smolvlm2-2b-k4-priors/routes.json",
     "phase3_root": "results/smolvlm2-2b-no-phase3"
   },
   "cache": {

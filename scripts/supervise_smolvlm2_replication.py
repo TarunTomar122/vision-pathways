@@ -19,6 +19,7 @@ MODEL_CONFIG = Path("configs/baseline_smolvlm2_2b.json")
 BASELINE_ROOT = Path("results/robust-route-search-smolvlm2-2b/baseline")
 PREPARED = Path("data/processed-v2/robust-route-search-smolvlm2-2b-k4/prepared")
 ABLATION = Path("results/smolvlm2-2b-single-block")
+PRIORS = Path("results/smolvlm2-2b-k4-priors")
 CONTROLS_CONFIG = Path("configs/robust_route_controls_smolvlm2_2b_k4_lean.json")
 FRESH_OCR_MANIFEST = Path("data/fresh-ocr-iiit5k-v1/manifests/heldout.jsonl")
 FRESH_OCR_ROOT = Path("results/fresh-ocr-iiit5k-smolvlm2-2b-k4")
@@ -92,11 +93,11 @@ def step(state: dict) -> bool:
             state,
         )
         return False
-    priors = ABLATION / "sensitivity.json"
+    priors = PRIORS / "sensitivity.json"
     if not priors.exists():
         launch(
             "build-priors",
-            command("scripts/build_single_block_priors.py", "--baseline-dir", str(BASELINE_ROOT), "--ablation-dir", str(ABLATION), "--development-manifest", "data/processed-v2/manifests/development.jsonl", "--output-dir", str(ABLATION), "--blocks", "0-26", "--budgets", "4"),
+            command("scripts/build_single_block_priors.py", "--baseline-dir", str(BASELINE_ROOT), "--ablation-dir", str(ABLATION), "--development-manifest", "data/processed-v2/manifests/development.jsonl", "--output-dir", str(PRIORS), "--blocks", "0-26", "--budgets", "4"),
             state,
         )
         return False
