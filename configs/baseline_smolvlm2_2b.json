@@ -1,0 +1,13 @@
+{
+  "model_id": "HuggingFaceTB/SmolVLM2-2.2B-Instruct",
+  "revision": "70402a4493c18f1a8f3b4be41adf17605fcc0aca",
+  "vision_adapter": "smolvlm",
+  "vision_block_count": 27,
+  "dtype": "bfloat16",
+  "attention_implementation": "sdpa",
+  "device": "cuda:0",
+  "do_sample": false,
+  "max_new_tokens": 24,
+  "seed": 20260716,
+  "warmup_examples": 3
+}

@@ -12,7 +12,7 @@ from pathlib import Path
 
 import torch
 from PIL import Image
-from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration, set_seed
+from transformers import AutoModelForImageTextToText, AutoProcessor, Qwen2_5_VLForConditionalGeneration, set_seed
 
 from .io import read_jsonl, sha256_file, write_json
 from .scoring import score_prediction
@@ -26,10 +26,19 @@ ANSWER_INSTRUCTIONS = {
 
 
 class VisionBlockIdentity(torch.nn.Module):
-    """Skip a vision block while preserving Qwen's block call signature."""
+    """Skip a vision block while preserving its encoder's output contract."""
 
-    def forward(self, hidden_states, **_kwargs):
-        return hidden_states
+    def __init__(self, output_contract: str = "tensor") -> None:
+        super().__init__()
+        if output_contract not in {"tensor", "tuple_first"}:
+            raise ValueError(f"Unsupported vision block output contract: {output_contract}")
+        self.output_contract = output_contract
+
+    def forward(self, *args, **kwargs):
+        hidden_states = kwargs.get("hidden_states", args[0] if args else None)
+        if hidden_states is None:
+            raise TypeError("VisionBlockIdentity requires hidden_states as the first argument")
+        return (hidden_states,) if self.output_contract == "tuple_first" else hidden_states
 
 
 def validate_skip_blocks(skip_blocks: list[int] | None, block_count: int) -> list[int]:
@@ -41,6 +50,42 @@ def validate_skip_blocks(skip_blocks: list[int] | None, block_count: int) -> lis
     if invalid:
         raise ValueError(f"Invalid vision block indices: {invalid}")
     return sorted(normalized)
+
+
+VISION_ADAPTERS = {
+    "qwen2_5_vl": {
+        "vision_module_path": ("visual",),
+        "vision_blocks_path": ("visual", "blocks"),
+        "block_output_contract": "tensor",
+        "input_mode": "qwen",
+    },
+    "smolvlm": {
+        "vision_module_path": ("model", "vision_model"),
+        "vision_blocks_path": ("model", "vision_model", "encoder", "layers"),
+        "block_output_contract": "tuple_first",
+        "input_mode": "smolvlm",
+    },
+}
+
+
+def _attribute_path(root, parts: tuple[str, ...]):
+    value = root
+    for part in parts:
+        value = getattr(value, part)
+    return value
+
+
+def resolve_vision_adapter(model, requested: str | None = None) -> dict:
+    """Resolve the separately-addressable vision tower for supported VLM families."""
+    adapter_name = requested or getattr(model.config, "model_type", None)
+    if adapter_name not in VISION_ADAPTERS:
+        supported = ", ".join(sorted(VISION_ADAPTERS))
+        raise ValueError(f"Unsupported VLM vision adapter {adapter_name!r}; supported: {supported}")
+    adapter = {"name": adapter_name, **VISION_ADAPTERS[adapter_name]}
+    blocks = _attribute_path(model, adapter["vision_blocks_path"])
+    if not isinstance(blocks, torch.nn.ModuleList) or not blocks:
+        raise ValueError(f"Vision block path for {adapter_name} is not a non-empty ModuleList")
+    return adapter
 
 
 def _nvidia_smi() -> dict:
@@ -116,32 +161,47 @@ class BaselineRunner:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         set_seed(int(config["seed"]))
         torch.backends.cudnn.benchmark = False
-        processor_kwargs = {
-            "revision": config.get("revision"),
-            "use_fast": False,
-        }
+        adapter_name = config.get("vision_adapter")
+        processor_kwargs = {"revision": config.get("revision")}
+        if adapter_name != "smolvlm":
+            processor_kwargs["use_fast"] = False
         for setting in ("min_pixels", "max_pixels"):
             if setting in config:
                 processor_kwargs[setting] = int(config[setting])
         self.processor = AutoProcessor.from_pretrained(config["model_id"], **processor_kwargs)
         dtype = torch.bfloat16 if config["dtype"] == "bfloat16" else torch.float16
         load_started = time.perf_counter()
-        self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
-            config["model_id"],
-            revision=config.get("revision"),
-            torch_dtype=dtype,
-            attn_implementation=config["attention_implementation"],
-            low_cpu_mem_usage=True,
-        ).to(config["device"])
+        model_kwargs = {
+            "revision": config.get("revision"),
+            "torch_dtype": dtype,
+            "attn_implementation": config["attention_implementation"],
+            "low_cpu_mem_usage": True,
+        }
+        if adapter_name == "qwen2_5_vl":
+            self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+                config["model_id"], **model_kwargs
+            ).to(config["device"])
+        else:
+            self.model = AutoModelForImageTextToText.from_pretrained(
+                config["model_id"], **model_kwargs
+            ).to(config["device"])
+        self.vision_adapter = resolve_vision_adapter(self.model, adapter_name)
+        self.vision_module = _attribute_path(self.model, self.vision_adapter["vision_module_path"])
+        self.vision_blocks = _attribute_path(self.model, self.vision_adapter["vision_blocks_path"])
+        expected_block_count = config.get("vision_block_count")
+        if expected_block_count is not None and len(self.vision_blocks) != int(expected_block_count):
+            raise ValueError(
+                f"Configured {expected_block_count} vision blocks, but loaded {len(self.vision_blocks)}"
+            )
         self._full_model_parameters = sum(parameter.numel() for parameter in self.model.parameters())
-        self._full_vision_parameters = sum(parameter.numel() for parameter in self.model.visual.parameters())
+        self._full_vision_parameters = sum(parameter.numel() for parameter in self.vision_module.parameters())
         self._block_parameters = {
             str(index): sum(parameter.numel() for parameter in block.parameters())
-            for index, block in enumerate(self.model.visual.blocks)
+            for index, block in enumerate(self.vision_blocks)
         }
         # Keep the original modules outside the model tree so hundreds of routes can be tested
         # without repeatedly loading the complete checkpoint.
-        self._original_vision_blocks = list(self.model.visual.blocks)
+        self._original_vision_blocks = list(self.vision_blocks)
         legacy_skip_block = config.get("skip_vision_block")
         skip_blocks = config.get("skip_vision_blocks")
         if legacy_skip_block is not None and skip_blocks is not None:
@@ -157,17 +217,17 @@ class BaselineRunner:
         self.generation_config.top_k = None
         self.generation_config.max_new_tokens = int(config["max_new_tokens"])
         self.model_load_seconds = time.perf_counter() - load_started
-        self.vision_timer = VisionTimer(self.model.visual)
+        self.vision_timer = VisionTimer(self.vision_module)
         self.results_path = self.output_dir / "predictions.jsonl"
 
     def set_skip_vision_blocks(self, skip_blocks: list[int] | None) -> None:
         """Activate a new identity route while retaining the loaded checkpoint in memory."""
         normalized = validate_skip_blocks(skip_blocks, len(self._original_vision_blocks))
-        blocks = self.model.visual.blocks
+        blocks = self.vision_blocks
         for index, original in enumerate(self._original_vision_blocks):
             blocks[index] = original
         for block in normalized:
-            blocks[block] = VisionBlockIdentity()
+            blocks[block] = VisionBlockIdentity(self.vision_adapter["block_output_contract"])
         removed = sum(self._block_parameters[str(block)] for block in normalized)
         self.parameter_counts = {
             "skipped_vision_blocks": normalized,
@@ -199,8 +259,17 @@ class BaselineRunner:
             }
         ]
         started = time.perf_counter()
-        text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        inputs = self.processor(text=[text], images=[image], padding=True, return_tensors="pt")
+        if self.vision_adapter["input_mode"] == "smolvlm":
+            inputs = self.processor.apply_chat_template(
+                messages,
+                add_generation_prompt=True,
+                tokenize=True,
+                return_dict=True,
+                return_tensors="pt",
+            )
+        else:
+            text = self.processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            inputs = self.processor(text=[text], images=[image], padding=True, return_tensors="pt")
         inputs = {key: value.to(self.config["device"]) for key, value in inputs.items()}
         torch.cuda.synchronize()
         preprocessing_ms = (time.perf_counter() - started) * 1000
@@ -320,6 +389,11 @@ class BaselineRunner:
             "examples_requested": len(rows),
             "examples_completed": len(all_results),
             "parameters": self.parameter_counts,
+            "vision_adapter": {
+                "name": self.vision_adapter["name"],
+                "blocks": len(self._original_vision_blocks),
+                "block_output_contract": self.vision_adapter["block_output_contract"],
+            },
         }
         write_json(self.output_dir / "run_metadata.json", metadata)
         return summary

@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "status": "frozen before SmolVLM2 robust route search",
+  "seed": 20260716,
+  "model_config": "configs/baseline_smolvlm2_2b.json",
+  "baseline_predictions": "results/robust-route-search-smolvlm2-2b/baseline/predictions.jsonl",
+  "output_dir": "results/robust-route-search-smolvlm2-2b",
+  "data": {
+    "root": "data/processed-v2",
+    "manifest": "data/processed-v2/manifests/all.jsonl",
+    "manifest_sha256": "ec3712d74a43caf8dd3d1818788ee0a92bc82e7aa597d640b00f089c6ed357c8",
+    "expected_examples": 1780,
+    "expected_images": 1431,
+    "prepared_dir": "data/processed-v2/robust-route-search-smolvlm2-2b/prepared",
+    "search_source_split": "development",
+    "selection_source_split": "test",
+    "partition_policy": "preserve the existing image-disjoint source split without resampling",
+    "selection_status": "method-selection evidence only; SmolVLM2 single-block discovery is development-only"
+  },
+  "priors": {
+    "sensitivity": "results/smolvlm2-2b-single-block/sensitivity.json",
+    "routes": "results/smolvlm2-2b-single-block/routes.json",
+    "phase3_root": "results/smolvlm2-2b-no-phase3"
+  },
+  "cache": {"reuse_phase3": false, "identity": "SmolVLM2 model config + baseline + source manifest + prepared manifests + development-only priors"},
+  "route": {"operation": "replace each selected vision transformer block with the identity", "allowed_blocks": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26], "k_values": [4, 6, 8], "fine_tuning": "none"},
+  "scouts": {
+    "source_split": "development",
+    "generic_images_per_capability_source": 8,
+    "generic_max_capability_source_strata": 10,
+    "generic_max_images_before_cross_stratum_deduplication": 80,
+    "task_target_images_per_source": 6,
+    "task_collateral_images_per_non_target_stratum": 1,
+    "task_max_images_before_cross_stratum_deduplication": 20,
+    "development_evaluation_max_images_per_capability_source": 24,
+    "selection": "seeded SHA-256 ordering within capability+source strata with exact quota balancing; retain every search row in each selected global image group"
+  },
+  "optimizer": {"algorithm": "seeded evolutionary subset search", "population_size": 16, "generations": 3, "generation_count_includes_initial_population": true, "development_finalists_per_seed": 2, "selection_finalists": 3, "seeds": [20260715, 20260716, 20260717], "evolution_selection": "Pareto front, NSGA-II crowding distance, frozen scalar selection score, then lexicographic route order", "deduplicate_routes": true, "tie_break": "lexicographically sorted block indices"},
+  "objectives": {
+    "generic": {"direction": "minimize", "scalar_loss": "0.50 * mean_drop_pp + 0.30 * worst_source_drop_pp + 0.20 * source_variability_pp", "weights": {"mean_drop_pp": 0.5, "worst_source_drop_pp": 0.3, "source_variability_pp": 0.2}, "scope": "all capabilities and sources"},
+    "task": {"direction": "minimize", "scalar_loss": "0.45 * mean_drop_pp + 0.30 * worst_source_drop_pp + 0.15 * collateral_drop_pp + 0.10 * source_variability_pp", "weights": {"mean_drop_pp": 0.45, "worst_source_drop_pp": 0.3, "collateral_drop_pp": 0.15, "source_variability_pp": 0.1}},
+    "paired_reference": "full-model predictions on the identical examples",
+    "failed_or_malformed_generations": "count as incorrect"
+  },
+  "selection": {"candidate_pool": "deduplicate two development finalists from each of three seeds and evaluate all six on prepared/development-evaluation.jsonl, then advance at most three finalists per objective and K", "development_ranking": "the matching frozen scalar loss on prepared/development-evaluation.jsonl", "ranking": "the matching frozen scalar loss on prepared/selection.jsonl", "final_tie_break": "lexicographically sorted block indices", "reuse_across_k": false},
+  "baselines": {"same_k_required": ["generic independent single-block ranking", "capability-conditional independent single-block ranking", "least-damaging contiguous route", "three deterministic random routes"], "unpruned_full_model": "accuracy reference only; not a same-compute route"},
+  "external_benchmark": {"status": "not accessed; fresh source-transfer evaluation will be sealed after all SmolVLM2 route selection is frozen", "forbidden_use": "route, finalist, K, objective, prompt, decoding, scoring, or hyperparameter selection"}
+}

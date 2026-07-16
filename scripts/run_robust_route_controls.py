@@ -37,6 +37,9 @@ def validate_config(config: dict, manifest: Path) -> None:
         raise ValueError("Selection manifest does not match the frozen control config")
     if sorted(int(value) for value in config["conditions"]) != [4, 6, 8]:
         raise ValueError("Control config must define K4, K6, and K8")
+    allowed_blocks = tuple(int(value) for value in config.get("allowed_blocks", range(32)))
+    if not allowed_blocks:
+        raise ValueError("Control config must define at least one allowed vision block")
     for raw_k, conditions in config["conditions"].items():
         k = int(raw_k)
         required = {"generic-independent", "task-independent", "contiguous", "random-0", "random-1", "random-2"}
@@ -47,7 +50,7 @@ def validate_config(config: dict, manifest: Path) -> None:
             if condition["kind"] == "conditional" and set(condition["routes"]) != set(CAPABILITIES):
                 raise ValueError(f"{name} K{k} does not define all capabilities")
             for route in routes:
-                normalize_route(route, k=k, allowed_blocks=range(32))
+                normalize_route(route, k=k, allowed_blocks=allowed_blocks)
 
 
 def run_condition(

@@ -52,7 +52,7 @@ def main():
     parser.add_argument("--data-root", type=Path, default=Path("data/processed"))
     parser.add_argument("--baseline-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--blocks", default="0-31", help="Block range, e.g. 0-31 or 0,4,8")
+    parser.add_argument("--blocks", required=True, help="Block range, e.g. 0-26 or 0,4,8")
     parser.add_argument("--limit", type=int)
     parser.add_argument("--suite", choices=["controlled", "external"])
     parser.add_argument("--split", choices=["development", "test"])
@@ -69,7 +69,15 @@ def main():
         blocks = list(range(first, last + 1))
     else:
         blocks = [int(value) for value in args.blocks.split(",") if value]
+    block_count = int(config.get("vision_block_count", 32))
+    invalid = [block for block in blocks if not 0 <= block < block_count]
+    if invalid:
+        raise ValueError(f"Requested blocks outside 0-{block_count - 1}: {invalid}")
     baseline_rows = list(read_jsonl(args.baseline_dir / "predictions.jsonl"))
+    if args.suite:
+        baseline_rows = [row for row in baseline_rows if row["suite"] == args.suite]
+    if args.split:
+        baseline_rows = [row for row in baseline_rows if row["split"] == args.split]
     if args.limit is not None:
         baseline_rows = baseline_rows[:args.limit]
     baseline_groups = _groups(baseline_rows)
@@ -122,7 +130,7 @@ def main():
         ax.set_yticks(range(len(capabilities)), capabilities)
         ax.set_xlabel("Skipped vision block")
         ax.set_ylabel("Capability")
-        ax.set_title("Qwen2.5-VL-3B identity ablation: accuracy drop (percentage points)")
+        ax.set_title(f"{config['model_id']} identity ablation: accuracy drop (percentage points)")
         fig.colorbar(image, ax=ax, label="Accuracy drop (pp)")
         fig.tight_layout()
         fig.savefig(args.output_dir / f"capability_layer_heatmap{suffix}.png", dpi=180)

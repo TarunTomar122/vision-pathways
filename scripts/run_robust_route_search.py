@@ -599,6 +599,10 @@ class FamilyJob:
             for value in nested(self.config, "route.allowed_blocks", default=list(range(32)))
         )
         normalize_route(allowed_blocks)
+        if len(set(allowed_blocks)) != len(allowed_blocks):
+            raise ValueError("route.allowed_blocks must be unique")
+        if max(budgets) >= len(allowed_blocks):
+            raise ValueError("route.allowed_blocks is too small for the configured K values")
         protocol = {
             "budgets": list(budgets),
             "development_finalists_per_seed": development_finalists,
