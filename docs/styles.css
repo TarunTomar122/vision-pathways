@@ -176,6 +176,216 @@ h2 span {
   font-size: 1.08rem;
 }
 
+h3 {
+  margin: 3rem 0 1rem;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.contents {
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--line);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.78rem;
+}
+
+.contents p {
+  margin: 0 0 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.contents ol {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.2rem 2rem;
+}
+
+.question {
+  max-width: 780px;
+  margin: 0 0 2rem;
+  font-size: clamp(1.35rem, 2.8vw, 1.8rem);
+  line-height: 1.4;
+}
+
+.pipeline {
+  margin: 2.3rem 0;
+  padding: 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  overflow-x: auto;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.pipeline span {
+  font-weight: 600;
+}
+
+.pipeline b {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.summary-grid {
+  margin: 2.5rem 0 3rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--ink);
+}
+
+.summary-grid div {
+  padding: 1rem 0.8rem 1rem 0;
+  border-bottom: 1px solid var(--soft-line);
+}
+
+.summary-grid dt {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-grid dd {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+.prose-list {
+  max-width: 740px;
+  padding-left: 1.35rem;
+}
+
+.prose-list li {
+  margin: 0.6rem 0;
+  padding-left: 0.3rem;
+}
+
+.table-wrap {
+  width: 100%;
+  margin: 1.8rem 0 2.4rem;
+  overflow-x: auto;
+  border-top: 1px solid var(--ink);
+}
+
+table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  padding: 0.72rem 0.7rem 0.72rem 0;
+  border-bottom: 1px solid var(--soft-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-weight: 700;
+}
+
+tfoot th {
+  border-bottom-color: var(--ink);
+}
+
+.note {
+  margin: 2rem 0;
+  padding: 0.9rem 0 0.9rem 1rem;
+  border-left: 2px solid var(--ink);
+  color: #333;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.definition-list {
+  margin: 1.8rem 0 0;
+  border-top: 1px solid var(--ink);
+}
+
+.definition-list div {
+  display: grid;
+  grid-template-columns: 155px 1fr;
+  gap: 1.5rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--soft-line);
+}
+
+.definition-list dt {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.definition-list dd {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.equation {
+  max-width: 520px;
+}
+
+.process-list,
+.takeaways {
+  margin: 2rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: item;
+  border-top: 1px solid var(--ink);
+}
+
+.process-list li,
+.takeaways li {
+  counter-increment: item;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--soft-line);
+}
+
+.process-list li::before,
+.takeaways li::before {
+  content: counter(item, decimal-leading-zero);
+  color: var(--muted);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.process-list strong,
+.takeaways strong {
+  font-weight: 600;
+}
+
+.process-list p,
+.takeaways p {
+  margin: 0.2rem 0 0;
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
 .finding-list {
   margin: 2.5rem 0 3.5rem;
   border-top: 1px solid var(--ink);
@@ -284,8 +494,21 @@ footer p {
     gap: 0.7rem;
   }
 
+  .contents ol {
+    grid-template-columns: 1fr;
+  }
+
   section {
     padding: 2.8rem 0;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .definition-list div {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
   }
 
   .finding-list > div {
