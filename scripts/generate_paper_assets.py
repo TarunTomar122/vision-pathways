@@ -11,12 +11,15 @@ from __future__ import annotations
 
 import argparse
 import csv
+import datetime as dt
 import hashlib
 import json
+import os
 import shutil
 from pathlib import Path
 from typing import Any
 
+os.environ.setdefault("SOURCE_DATE_EPOCH", "0")
 import matplotlib
 
 matplotlib.use("Agg")
@@ -95,6 +98,7 @@ def setup_style() -> None:
             "axes.labelcolor": COLORS["ink"],
             "legend.frameon": False,
             "svg.fonttype": "none",
+            "svg.hashsalt": "vlm-vision-paths",
             "pdf.fonttype": 42,
         }
     )
@@ -103,11 +107,18 @@ def setup_style() -> None:
 def save_figure(fig: plt.Figure, out_dir: Path, name: str) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for suffix in ("png", "pdf", "svg"):
+        metadata = None
+        if suffix == "pdf":
+            epoch = dt.datetime(1970, 1, 1, tzinfo=dt.UTC)
+            metadata = {"CreationDate": epoch, "ModDate": epoch}
+        elif suffix == "svg":
+            metadata = {"Date": None}
         fig.savefig(
             out_dir / f"generated-{name}.{suffix}",
             dpi=240 if suffix == "png" else None,
             bbox_inches="tight",
             pad_inches=0.08,
+            metadata=metadata,
         )
     svg_path = out_dir / f"generated-{name}.svg"
     normalized_svg = "\n".join(line.rstrip() for line in svg_path.read_text(encoding="utf-8").splitlines())
@@ -546,7 +557,7 @@ def main() -> int:
     plot_efficiency(data, figures)
     write_tables(data, output_root / "tables")
     if output_root == (ROOT / "paper").resolve():
-        site_assets = ROOT / "site/assets"
+        site_assets = ROOT / "docs/assets"
         site_assets.mkdir(parents=True, exist_ok=True)
         for png in figures.glob("generated-*.png"):
             shutil.copy2(png, site_assets / png.name)

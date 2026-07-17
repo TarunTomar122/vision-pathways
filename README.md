@@ -48,19 +48,19 @@ make PYTHON=.paper-venv/bin/python submission
 
 ```text
 paper/                      Manuscript outline, writing prompts, references, figures and tables
-site/                       Responsive static research website ready to mirror in Wix
+docs/                       GitHub Pages research website and generated web assets
+research-docs/              Dataset card, final status and frozen experimental protocols
 results/                    Committed aggregate evidence and historical experiment reports
 configs/                    Frozen model, dataset, search and evaluation configurations
 data/*/manifests/           Reproducible metadata and hashes; dataset images are not committed
 scripts/                    Dataset, inference, analysis, search and paper-generation commands
 src/vlm_bench/              Dataset, scoring and VLM evaluation implementation
 tests/                      CPU unit tests
-docs/                       Dataset card and frozen experimental protocols
 decision-log/               Commit-level research and engineering decisions
 ```
 
 Start with the [paper package](paper/README.md), [final conclusions](results/cross-model-replication-k4/CONCLUSIONS.md),
-and [research website](site/index.html).
+and [GitHub Pages website](docs/index.html).
 
 ## Experimental Design
 
@@ -95,8 +95,8 @@ skipping reduces executed vision depth but does not by itself create a smaller s
 - [Section-by-section writing guide](paper/writing-guide.md)
 - [Related work map and BibTeX](paper/related-work.md)
 - [Submission checklist](paper/submission-checklist.md)
-- [Dataset card](docs/dataset_card.md)
-- [Robust route-search protocol](docs/robust_route_search_protocol.md)
+- [Dataset card](research-docs/dataset_card.md)
+- [Robust route-search protocol](research-docs/robust_route_search_protocol.md)
 - [Final cross-model report](results/cross-model-replication-k4/README.md)
 - [Qwen matched-K analysis](results/robust-route-search-qwen25-vl-3b/analysis/README.md)
 - [SmolVLM2 K4 analysis](results/robust-route-search-smolvlm2-2b-k4/analysis/README.md)

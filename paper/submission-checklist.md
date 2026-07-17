@@ -37,8 +37,8 @@ Official process: https://info.arxiv.org/help/submit/index.html
 
 ## Website/Wix
 
-- [ ] Run `make submission` and inspect `site/index.html` locally.
+- [ ] Run `make submission` and inspect `docs/index.html` locally.
 - [ ] Replace the paper placeholder with the final arXiv URL.
 - [ ] Add author/affiliation information after approval.
-- [ ] Upload `site/assets/` alongside the page, or recreate sections in Wix using the supplied copy.
+- [ ] Publish `docs/` with GitHub Pages, or recreate its sections in Wix using the supplied copy.
 - [ ] Verify mobile layout, figure alt text, repository link, and caveat text.

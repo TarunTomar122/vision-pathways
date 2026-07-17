@@ -73,7 +73,8 @@ search. They are supporting/appendix material, not separate main claims.
 
 - `paper/`: claim boundaries, detailed outline, writing prompts, references, generated figures,
   generated tables, and arXiv checklist.
-- `site/`: static research website and regenerated publication assets.
+- `docs/`: GitHub Pages research website and regenerated publication assets.
+- `research-docs/`: final status, dataset documentation, and frozen experimental protocols.
 - `paper/data/paper-data.json`: compact machine-readable source for every final plot/table.
 - `scripts/generate_paper_assets.py`: authoritative JSON-to-paper generator.
 - `scripts/verify_submission.py`: checks budgets, key values, caveats, assets, and website copy.

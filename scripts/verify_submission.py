@@ -57,8 +57,8 @@ def main() -> int:
         ROOT / "paper/tables/generated-main-results.md",
         ROOT / "paper/tables/generated-main-results.tex",
         ROOT / "paper/tables/generated-capability-results.csv",
-        ROOT / "site/index.html",
-        ROOT / "site/styles.css",
+        ROOT / "docs/index.html",
+        ROOT / "docs/styles.css",
         ROOT / "paper/outline.md",
         ROOT / "paper/writing-guide.md",
         ROOT / "paper/references.bib",
@@ -67,11 +67,11 @@ def main() -> int:
     for path in required:
         require(path.is_file() and path.stat().st_size > 100, f"Missing required submission file: {path}")
 
-    html = (ROOT / "site/index.html").read_text(encoding="utf-8")
+    html = (ROOT / "docs/index.html").read_text(encoding="utf-8")
     require("-13.6" in html, "Website omits the negative transfer result")
     require("unlocked same-VM" in html, "Website omits latency caveat")
     require("SmolVLM2 K4" in html, "Website must identify Smol's completed budget")
-    print("Submission verification passed: frozen results, 21 figure files, tables, docs, and site.")
+    print("Submission verification passed: frozen results, 21 figure files, tables, research docs, and Pages site.")
     return 0
 
 
