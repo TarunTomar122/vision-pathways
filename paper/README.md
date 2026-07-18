@@ -22,13 +22,14 @@ python3 -m venv .paper-venv
 make PYTHON=.paper-venv/bin/python submission
 ```
 
-The command regenerates PNG, PDF, and SVG versions of seven figures, writes CSV/Markdown/LaTeX
+The command regenerates PNG, PDF, and SVG versions of eight figures, writes CSV/Markdown/LaTeX
 tables, and verifies the exact frozen values used by the paper and website.
 
 ## Figure Map
 
 | Figure | Recommended placement | Main point |
 |---|---|---|
+| `generated-single-block-sensitivity` | Introduction / motivation | Individual sensitivity varies across capability and depth |
 | `generated-method-overview` | Method | Matched-budget evolutionary route search |
 | `generated-qwen-accuracy-by-budget` | Main results | Evolved routes degrade more gracefully than naive controls |
 | `generated-matched-k4-controls` | Main results | Evolution helps on both architectures at the same K |

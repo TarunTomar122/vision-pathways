@@ -12,6 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 EXPECTED_FIGURES = {
+    "single-block-sensitivity",
     "method-overview",
     "qwen-accuracy-by-budget",
     "matched-k4-controls",
@@ -71,7 +72,11 @@ def main() -> int:
     require("-13.6" in html, "Website omits the negative transfer result")
     require("unlocked same-VM" in html, "Website omits latency caveat")
     require("4 of 27" in html, "Website must identify Smol's completed four-block setting")
-    print("Submission verification passed: frozen results, 21 figure files, tables, research docs, and Pages site.")
+    figure_files = len(EXPECTED_FIGURES) * 3
+    print(
+        f"Submission verification passed: frozen results, {figure_files} figure files, "
+        "tables, research docs, and Pages site."
+    )
     return 0
 
 

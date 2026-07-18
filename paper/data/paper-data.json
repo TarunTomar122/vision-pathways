@@ -1210,6 +1210,10 @@
     {
       "path": "results/fixed-clock-latency-smolvlm2-2b-k4/k4/summary.json",
       "sha256": "0e8113d1c3b59e210698f836143c6d7402538b6ed0f63ba4ecea6c88cd1b5fba"
+    },
+    {
+      "path": "results/ablation-qwen25-vl-3b/capability_accuracy_drops.csv",
+      "sha256": "0542301adb0c44f52fc60c933bc97164b41694d2fb9a9557eda28588aeddfd46"
     }
   ]
 }

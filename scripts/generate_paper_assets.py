@@ -36,6 +36,7 @@ SMOL_ROUTES = ROOT / "results/robust-route-search-smolvlm2-2b-k4/frozen_routes.j
 CROSS_MODEL = ROOT / "results/cross-model-replication-k4/report.json"
 QWEN_LATENCY = ROOT / "results/task-route-latency-locked-qwen25-vl-3b/summary.json"
 SMOL_LATENCY = ROOT / "results/fixed-clock-latency-smolvlm2-2b-k4/k4/summary.json"
+QWEN_SINGLE_BLOCK = ROOT / "results/ablation-qwen25-vl-3b/capability_accuracy_drops.csv"
 
 CAPABILITIES = ["attribute", "counting", "object", "ocr", "spatial"]
 METHOD_ORDER = [
@@ -275,6 +276,7 @@ def build_data() -> dict[str, Any]:
                 CROSS_MODEL,
                 QWEN_LATENCY,
                 SMOL_LATENCY,
+                QWEN_SINGLE_BLOCK,
             )
         ],
     }
@@ -333,6 +335,31 @@ def plot_method(out_dir: Path) -> None:
     ax.text(6.1, 1.63, "finish", ha="center", color=COLORS["muted"], fontsize=8.5)
     ax.set_title("Evolutionary search at a matched skip budget", loc="left", pad=3)
     save_figure(fig, out_dir, "method-overview")
+
+
+def plot_single_block_sensitivity(out_dir: Path) -> None:
+    with QWEN_SINGLE_BLOCK.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    if len(rows) != 32:
+        raise ValueError(f"Expected 32 Qwen single-block rows; found {len(rows)}")
+
+    matrix = np.array(
+        [[float(row[f"{capability}_drop_pp"]) for row in rows] for capability in CAPABILITIES]
+    )
+    fig, ax = plt.subplots(figsize=(10.2, 3.1))
+    image = ax.imshow(matrix, cmap="RdYlGn_r", vmin=-5, vmax=28, aspect="auto")
+    ax.set_xticks(range(32))
+    ax.set_xticklabels(range(32), fontsize=7)
+    ax.set_yticks(
+        range(len(CAPABILITIES)),
+        [capability.title() if capability != "ocr" else "OCR" for capability in CAPABILITIES],
+    )
+    ax.set_xlabel("Skipped vision block")
+    ax.set_ylabel("Capability")
+    ax.set_title("Single-block sensitivity varies across capability and depth", loc="left")
+    cbar = fig.colorbar(image, ax=ax, fraction=0.025, pad=0.025)
+    cbar.set_label("Accuracy drop from full model (pp)")
+    save_figure(fig, out_dir, "single-block-sensitivity")
 
 
 def plot_budget_accuracy(data: dict[str, Any], out_dir: Path) -> None:
@@ -566,6 +593,7 @@ def main() -> int:
     (data_dir / "paper-data.json").write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
     figures = output_root / "figures"
     plot_method(figures)
+    plot_single_block_sensitivity(figures)
     plot_budget_accuracy(data, figures)
     plot_controls(data, figures)
     plot_heatmap(data, figures)
@@ -578,7 +606,7 @@ def main() -> int:
         site_assets.mkdir(parents=True, exist_ok=True)
         for png in figures.glob("generated-*.png"):
             shutil.copy2(png, site_assets / png.name)
-    print(f"Generated 7 figure sets and paper tables under {output_root}")
+    print(f"Generated 8 figure sets and paper tables under {output_root}")
     return 0
 
 
