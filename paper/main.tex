@@ -6,6 +6,7 @@
 \usepackage{amsmath,amssymb}
 \usepackage[a4paper,margin=0.82in]{geometry}
 \usepackage[section]{placeins}
+\usepackage{flafter}
 \usepackage{caption}
 \usepackage{fancyhdr}
 \setcounter{secnumdepth}{3}
@@ -587,8 +588,8 @@ result.
 contains 32 vision blocks \citep{bai2025qwen25vl}. The replication model
 is SmolVLM2-2.2B-Instruct, which contains 27 vision blocks
 \citep{huggingface2025smolvlm2}. We pin Qwen revision
-\texttt{66285546d2b821cf421d4f5eb2576359d3770cd3} and SmolVLM2 revision
-\texttt{482adb537c021c86670beed01cd58990d01e72e4}. Both models use
+\nolinkurl{66285546d2b821cf421d4f5eb2576359d3770cd3} and SmolVLM2 revision
+\nolinkurl{482adb537c021c86670beed01cd58990d01e72e4}. Both models use
 deterministic greedy decoding and batch-size-one inference. The
 full-model accuracies on the 876-example selection partition are 83.68\%
 for Qwen and 82.65\% for SmolVLM2.

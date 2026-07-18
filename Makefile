@@ -1,4 +1,4 @@
-.PHONY: paper-assets verify-paper submission paper-pdf overleaf-package clean-paper-assets clean-paper-latex
+.PHONY: paper-assets verify-paper submission paper-pdf overleaf-package arxiv-package clean-paper-assets clean-paper-latex
 
 PYTHON ?= python3
 
@@ -15,6 +15,9 @@ paper-pdf: paper-assets
 
 overleaf-package: paper-pdf
 	cd paper && zip -FS -q overleaf-package.zip main.tex references.bib figures/*.pdf tables/generated-main-results.tex
+
+arxiv-package: paper-pdf
+	cd paper && zip -FS -q arxiv-source.zip main.tex references.bib figures/*.pdf tables/generated-main-results.tex
 
 clean-paper-assets:
 	rm -f paper/data/paper-data.json paper/tables/generated-* paper/figures/generated-*

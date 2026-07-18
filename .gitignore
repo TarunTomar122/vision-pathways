@@ -32,3 +32,9 @@ paper/*.fdb_latexmk
 paper/*.fls
 paper/*.log
 paper/*.out
+
+# Reproducible paper delivery artifacts and duplicate figure formats
+paper/overleaf-package.zip
+paper/arxiv-source.zip
+paper/figures/generated-*.png
+paper/figures/generated-*.svg

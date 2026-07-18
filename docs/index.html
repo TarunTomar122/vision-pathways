@@ -24,10 +24,11 @@
       <p class="paper-type">Empirical study</p>
       <h1>Searching for Task-Specific Vision Paths</h1>
       <p class="subtitle">Can a vision-language model skip different encoder blocks for different visual capabilities without losing accuracy?</p>
-      <p class="metadata">Qwen2.5-VL and SmolVLM2<br>Two architectures, five capabilities, matched skip budgets<br>July 2026</p>
+      <p class="metadata">Qwen2.5-VL and SmolVLM2<br>Two architectures, five capabilities, matched skip budgets<br>Preprint prepared, arXiv submission pending</p>
       <p class="links">
+        <a href="https://raw.githubusercontent.com/TarunTomar122/vision-pathways/main/paper/main.pdf">Read paper (PDF)</a>
         <a href="https://github.com/TarunTomar122/vision-pathways">Code and data</a>
-        <a href="https://github.com/TarunTomar122/vision-pathways/tree/main/paper">Paper package</a>
+        <a href="https://github.com/TarunTomar122/vision-pathways/blob/main/paper/main.tex">LaTeX source</a>
       </p>
     </header>
 
@@ -182,7 +183,7 @@ Pareto vector = (mu_t, w_t, kappa_t, sigma_t)</code></pre>
       <p class="note"><strong>What it is not:</strong> this is not a learned per-question router, gradient training, or proof of the globally best subset. The capability policy uses a known capability label to choose among five frozen routes.</p>
 
       <figure>
-        <img src="assets/generated-method-overview.png" alt="Compact evolutionary route search workflow with six stages">
+        <img src="assets/generated-method-overview.png" alt="Compact evolutionary route search workflow with seven numbered stages">
         <figcaption><span>Figure 1.</span> Route search evaluates candidates on balanced scouts, advances finalists through development evaluation, freezes one winner per objective, and then audits transfer.</figcaption>
       </figure>
 
@@ -321,11 +322,12 @@ Pareto vector = (mu_t, w_t, kappa_t, sigma_t)</code></pre>
     <section id="artifacts" class="artifacts">
       <h2><span>7.</span> Reproducibility</h2>
       <p>Exact model revisions, route blocks, seeds, manifest hashes, aggregate results, and figure inputs are committed. Raw third-party images, model weights, and large prediction caches are intentionally excluded from Git.</p>
-      <p>Every plotted value traces back to frozen JSON. The repository regenerates 21 publication figure files, manuscript tables, and the website assets with one CPU-only command.</p>
+      <p>Every plotted value traces back to frozen JSON. The repository regenerates 24 publication figure files, manuscript tables, and the website assets with one CPU-only command.</p>
       <pre><code>make PYTHON=.paper-venv/bin/python submission</code></pre>
       <p class="links">
         <a href="https://github.com/TarunTomar122/vision-pathways">Repository</a>
-        <a href="https://github.com/TarunTomar122/vision-pathways/tree/main/paper">Paper package</a>
+        <a href="https://raw.githubusercontent.com/TarunTomar122/vision-pathways/main/paper/main.pdf">Paper PDF</a>
+        <a href="https://github.com/TarunTomar122/vision-pathways/tree/main/paper">Paper source</a>
         <a href="https://github.com/TarunTomar122/vision-pathways/tree/main/research-docs">Protocols and dataset card</a>
         <a href="https://github.com/TarunTomar122/vision-pathways/tree/main/results/cross-model-replication-k4">Final evidence</a>
       </p>

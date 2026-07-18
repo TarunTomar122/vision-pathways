@@ -1,18 +1,17 @@
 # Paper Package
 
-Working title: **Searching for Task-Specific Vision Paths: Evolutionary Block Pruning Across Vision-Language Models**
+Title: **Searching for Task-Specific Vision Paths: Evolutionary Block Pruning Across Vision-Language Models**
 
-This directory is the CPU-only handoff from completed experiments to manuscript writing. Generated
-files are derived from committed aggregate evidence; no model weights, images, or GPU are required.
+This directory contains the canonical paper source and the CPU-only path from committed experiment
+evidence to the manuscript. No model weights, dataset images, or GPU are required.
 
 ## Start Here
 
-1. Read [`claims-and-limitations.md`](claims-and-limitations.md) before drafting claims.
-2. Use [`method.md`](method.md) for the implemented equations, operators, and pseudocode.
-3. Follow [`outline.md`](outline.md) section by section.
-4. Use [`writing-guide.md`](writing-guide.md) as paragraph prompts.
-5. Insert figures from [`figures/`](figures/) and tables from [`tables/`](tables/).
-6. Complete [`submission-checklist.md`](submission-checklist.md) before arXiv upload.
+1. Read the current [`main.pdf`](main.pdf).
+2. Edit the canonical [`main.tex`](main.tex) and [`references.bib`](references.bib).
+3. Check every claim against [`claims-and-limitations.md`](claims-and-limitations.md).
+4. Use [`method.md`](method.md) to audit equations, operators, and pseudocode.
+5. Complete [`submission-checklist.md`](submission-checklist.md) before arXiv upload.
 
 ## Regenerate Everything
 
@@ -44,10 +43,30 @@ typesetting overflow warnings.
 make overleaf-package
 ```
 
-Upload [`overleaf-package.zip`](overleaf-package.zip) as a new Overleaf project. The archive contains
-`main.tex`, `references.bib`, all eight vector PDF figures, and the generated LaTeX results table with
-the same relative paths used by the manuscript. Overleaf should detect `main.tex` as the root file and
-compile it with pdfLaTeX.
+The generated `overleaf-package.zip` is intentionally ignored by Git. Upload it as a new Overleaf
+project when needed. It contains `main.tex`, `references.bib`, all eight vector PDF figures, and the
+generated LaTeX results table with the same relative paths used by the manuscript. Overleaf should
+detect `main.tex` as the root file and compile it with pdfLaTeX.
+
+The same source layout is suitable for arXiv. Follow [`submission-checklist.md`](submission-checklist.md)
+for the upload, metadata, license, human review, and AI-assistance checks.
+
+```bash
+make arxiv-package
+```
+
+This creates the ignored local file `arxiv-source.zip`. Upload that archive only after completing the
+submission checklist and checking that it matches the final Overleaf manuscript.
+
+## What Is Canonical
+
+- Keep: `main.tex`, `main.pdf`, `references.bib`, `figures/*.pdf`,
+  `tables/generated-main-results.tex`, the evidence tables/data, and the research notes.
+- Generated but not tracked: `overleaf-package.zip`, `figures/*.png`, `figures/*.svg`, and LaTeX
+  intermediate files.
+- Website-specific raster figures live once under `docs/assets/`.
+- `draft.md`, `outline.md`, and `writing-guide.md` are retained as writing history, not as the
+  submission source of truth.
 
 ## Figure Map
 

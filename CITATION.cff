@@ -5,6 +5,6 @@ type: software
 authors:
   - family-names: Tomar
     given-names: Tarun
-repository-code: "https://github.com/TarunTomar122/vlm-bench"
-date-released: 2026-07-16
-version: 0.1.0
+repository-code: "https://github.com/TarunTomar122/vision-pathways"
+date-released: 2026-07-18
+version: 0.2.0

@@ -2,6 +2,8 @@
 
 **Evolutionary block pruning across Qwen2.5-VL and SmolVLM2**
 
+[Paper PDF](https://raw.githubusercontent.com/TarunTomar122/vision-pathways/main/paper/main.pdf) | [Research website](https://taruntomar122.github.io/vision-pathways/) | [LaTeX source](paper/main.tex)
+
 This repository studies a narrow question: when a VLM vision encoder must skip the same number of
 transformer blocks, can combinatorial search find better routes than independent, contiguous, or
 random pruning, and do named visual capabilities benefit from different routes?
@@ -18,7 +20,7 @@ transfer set, the Smol OCR-specific four-block route is 13.6 points worse than i
 route. The defensible conclusion is that **route search generalizes, but a universal
 capability-to-layer map does not**.
 
-![Cross-model capability heatmap](paper/figures/generated-cross-model-capability-heatmap.png)
+![Cross-model capability heatmap](docs/assets/generated-cross-model-capability-heatmap.png)
 
 ## How to Read the Route Names
 
@@ -157,7 +159,7 @@ make PYTHON=.paper-venv/bin/python submission
 ## Repository Map
 
 ```text
-paper/                      Formal method, manuscript outline, references, figures and tables
+paper/                      Canonical LaTeX manuscript, PDF, references, vector figures and tables
 docs/                       GitHub Pages research website and generated web assets
 research-docs/              Dataset card, final status and frozen experimental protocols
 results/                    Committed aggregate evidence and historical experiment reports
@@ -201,6 +203,8 @@ skipping reduces executed vision depth but does not by itself create a smaller s
 
 ## Core Documentation
 
+- [Current manuscript PDF](paper/main.pdf)
+- [Canonical LaTeX source](paper/main.tex)
 - [Paper claim and limitations](paper/claims-and-limitations.md)
 - [Formal evolutionary-search method](paper/method.md)
 - [Manuscript outline](paper/outline.md)
@@ -219,3 +223,11 @@ The full GPU pipeline remains available for audit and extension. See `requiremen
 configs, and the protocol documents. Raw predictions, dataset images, model snapshots, and caches
 are intentionally excluded from Git; compact summaries, routes, hashes, and paired analyses are
 committed. The final paper package does not require rerunning inference.
+
+## Tracked Artifact Policy
+
+The repository keeps the canonical LaTeX source, BibTeX database, PDF figures, generated LaTeX table,
+compiled manuscript PDF, website PNGs, aggregate result JSON, protocols, configs, and code. It does
+not track Overleaf/arXiv ZIP exports, duplicate paper PNG/SVG figures, LaTeX intermediate files, model
+weights, third-party images, or large prediction caches. Run `make overleaf-package` whenever a fresh
+source ZIP is needed locally.
