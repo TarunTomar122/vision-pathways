@@ -1,4 +1,4 @@
-.PHONY: paper-assets verify-paper submission paper-pdf overleaf-package arxiv-package clean-paper-assets clean-paper-latex
+.PHONY: paper-assets verify-paper submission paper-pdf overleaf-package arxiv-package arxiv-preflight clean-paper-assets clean-paper-latex
 
 PYTHON ?= python3
 
@@ -18,6 +18,9 @@ overleaf-package: paper-pdf
 
 arxiv-package: paper-pdf
 	cd paper && zip -FS -q arxiv-source.zip main.tex references.bib figures/*.pdf tables/generated-main-results.tex
+
+arxiv-preflight: arxiv-package
+	$(PYTHON) scripts/arxiv_preflight.py
 
 clean-paper-assets:
 	rm -f paper/data/paper-data.json paper/tables/generated-* paper/figures/generated-*

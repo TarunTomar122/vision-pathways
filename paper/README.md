@@ -11,7 +11,9 @@ evidence to the manuscript. No model weights, dataset images, or GPU are require
 2. Edit the canonical [`main.tex`](main.tex) and [`references.bib`](references.bib).
 3. Check every claim against [`claims-and-limitations.md`](claims-and-limitations.md).
 4. Use [`method.md`](method.md) to audit equations, operators, and pseudocode.
-5. Complete [`submission-checklist.md`](submission-checklist.md) before arXiv upload.
+5. Copy the form fields from [`arxiv-metadata.md`](arxiv-metadata.md).
+6. Review the primary-source record in [`citation-audit.md`](citation-audit.md).
+7. Complete [`submission-checklist.md`](submission-checklist.md) before arXiv upload.
 
 ## Regenerate Everything
 
@@ -57,6 +59,15 @@ make arxiv-package
 
 This creates the ignored local file `arxiv-source.zip`. Upload that archive only after completing the
 submission checklist and checking that it matches the final Overleaf manuscript.
+
+Run the complete clean-room package audit before uploading:
+
+```bash
+make PYTHON=.paper-venv/bin/python arxiv-preflight
+```
+
+This verifies the exact ZIP contents, metadata constraints, citations, included files, source hygiene,
+clean TeX compilation, final log, page count, encryption state, and embedded fonts.
 
 ## What Is Canonical
 

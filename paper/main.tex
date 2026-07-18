@@ -51,6 +51,7 @@
 \IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
 \makesavenoteenv{longtable}
 \usepackage{graphicx}
+\usepackage{float}
 \makeatletter
 \newsavebox\pandoc@box
 \newcommand*\pandocbounded[1]{% scales image to fit in text height/width
@@ -74,7 +75,7 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
 \hypersetup{
-  pdftitle={Searching for Task-Specific Vision Paths},
+  pdftitle={Searching for Task-Specific Vision Paths: Evolutionary Block Pruning Across Vision-Language Models},
   pdfauthor={Tarun Tomar},
   colorlinks=true,
   linkcolor=black,
@@ -184,6 +185,13 @@ the best routes found under a frozen evolutionary procedure rather than
 claiming a global optimum. All comparisons use matched pruning budgets,
 meaning every compared route skips exactly the same number of blocks.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.98\linewidth]{figures/generated-single-block-sensitivity.pdf}
+\caption{Accuracy drop after replacing one Qwen2.5-VL-3B vision block at a time with identity. Most blocks cause limited average damage when skipped alone, but sensitivity varies by capability and depth. This is screening evidence: a low single-block drop does not imply that several such blocks can be safely combined or that a capability is stored in a specific block.}
+\label{fig:single-block-sensitivity}
+\end{figure}
+
 We use Qwen2.5-VL-3B-Instruct as the primary model and
 SmolVLM2-2.2B-Instruct as a second architecture. Our dataset covers five
 visual capabilities: OCR, counting, object existence, attributes, and
@@ -221,13 +229,6 @@ Our contributions are:
   A capability-level, cross-model, and source-transfer analysis showing
   both the potential and limitations of capability-specific routing.
 \end{enumerate}
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.98\linewidth]{figures/generated-single-block-sensitivity.pdf}
-\caption{Accuracy drop after replacing one Qwen2.5-VL-3B vision block at a time with identity. Most blocks cause limited average damage when skipped alone, but sensitivity varies by capability and depth. This is screening evidence: a low single-block drop does not imply that several such blocks can be safely combined or that a capability is stored in a specific block.}
-\label{fig:single-block-sensitivity}
-\end{figure}
 
 \section{Motivation}\label{motivation}
 
@@ -770,6 +771,8 @@ canonical pathway for a capability.
 \label{fig:route-stability}
 \end{figure}
 
+\FloatBarrier
+
 Identity skipping produces a meaningful reduction in executed vision
 depth but a modest reduction in whole-model parameters (Figure 8). Four
 Qwen blocks account for 11.79\% of vision-tower parameters and 2.10\% of
@@ -779,7 +782,7 @@ parameters bypassed during execution. The original modules remain in the
 loaded checkpoint, so our implementation does not yet produce a
 physically smaller model file.
 
-\begin{figure}[t]
+\begin{figure}[H]
 \centering
 \includegraphics[width=0.98\linewidth]{figures/generated-efficiency-summary.pdf}
 \caption{Four-block parameter fractions for both models and measured SmolVLM2 latency. The latency measurement is an unlocked same-VM comparison on one RTX 4090, not fixed-clock or edge-device evidence.}
@@ -916,6 +919,63 @@ result is narrower but reproducible: combinatorial search is a useful
 tool for vision-depth pruning, while reliable dynamic routing will
 require richer per-input signals, stronger multi-source validation, and
 hardware-aware optimization.
+
+\appendix
+
+\section{Reproducibility Details}\label{reproducibility-details}
+
+Table 2 reports every frozen route used by the final policies. Block
+indices are zero-based and identify vision-transformer blocks replaced
+by identity. A dash means that budget was not evaluated for that model.
+
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llp{0.19\linewidth}p{0.23\linewidth}p{0.28\linewidth}}
+\toprule
+Model & Route family & K4 & K6 & K8 \\
+\midrule
+Qwen & Shared & 3, 9, 20, 28 & 5, 9, 11, 25, 28, 29 & 4, 6, 8, 9, 20, 24, 25, 28 \\
+Qwen & Attribute & 4, 8, 9, 22 & 3, 8, 9, 18, 20, 25 & 3, 6, 8, 13, 20, 25, 26, 28 \\
+Qwen & Counting & 3, 19, 24, 25 & 4, 5, 10, 20, 21, 29 & 3, 6, 11, 12, 17, 24, 27, 28 \\
+Qwen & Object & 3, 5, 10, 19 & 2, 5, 9, 10, 23, 30 & 2, 3, 9, 10, 20, 21, 23, 30 \\
+Qwen & OCR & 5, 9, 25, 28 & 4, 5, 9, 26, 27, 28 & 4, 5, 9, 11, 25, 26, 27, 28 \\
+Qwen & Spatial & 3, 19, 24, 25 & 3, 5, 12, 20, 22, 26 & 4, 6, 16, 19, 22, 26, 28, 29 \\
+\midrule
+SmolVLM2 & Shared & 4, 22, 24, 25 & -- & -- \\
+SmolVLM2 & Attribute & 5, 11, 22, 25 & -- & -- \\
+SmolVLM2 & Counting & 11, 16, 20, 24 & -- & -- \\
+SmolVLM2 & Object & 4, 16, 21, 22 & -- & -- \\
+SmolVLM2 & OCR & 5, 11, 19, 25 & -- & -- \\
+SmolVLM2 & Spatial & 4, 19, 21, 24 & -- & -- \\
+\bottomrule
+\end{tabular}
+\caption{Frozen block-skipping routes. Each cell is one exact fixed-cardinality route, not an ordered execution path.}
+\label{tab:frozen-routes}
+\end{table}
+
+All searches use seeds 20260715, 20260716, and 20260717. Qwen uses
+population 16 and three evaluated generations for K4, K6, and K8;
+SmolVLM2 uses population 12 and two evaluated generations for K4. The
+Qwen frozen-route and search-configuration SHA-256 hashes are
+\nolinkurl{1ca8d3583c6eed93e0375dafc96f90984e8212730be5c2ebcb4be84f9fbfb67c}
+and
+\nolinkurl{41ba104f2d9df24b67d38e137377de1734e6ada9c7c5f1148c4d3e4afea0170f}.
+The corresponding SmolVLM2 hashes are
+\nolinkurl{78dccefccc6bf8174d07539830f2014823266d042af9940ac6b9d047a3ef13f4}
+and
+\nolinkurl{ab27d6e3d8df1bf7407f380e8c4fbe29c5b79ced0a2af6fa00970524fa05f424}.
+Source, aggregate evidence, and regeneration scripts are available at
+\url{https://github.com/TarunTomar122/vision-pathways} under the
+\texttt{arxiv-v1-candidate} tag.
+
+\section*{Acknowledgements}
+
+AI-assisted tools were used for code assistance, experiment
+orchestration, figure generation, manuscript organization, and language
+editing. No AI system is an author; responsibility for the submitted
+work remains with the human author.
 
 \bibliography{references.bib}
 
