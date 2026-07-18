@@ -25,6 +25,30 @@ make PYTHON=.paper-venv/bin/python submission
 The command regenerates PNG, PDF, and SVG versions of eight figures, writes CSV/Markdown/LaTeX
 tables, and verifies the exact frozen values used by the paper and website.
 
+## Build The Paper
+
+The editable manuscript is [`main.tex`](main.tex), its bibliography is
+[`references.bib`](references.bib), and the verified render is [`main.pdf`](main.pdf).
+
+```bash
+make paper-pdf
+```
+
+This target regenerates the evidence-backed figures and table before compiling the manuscript with
+`latexmk`, `pdflatex`, and BibTeX. The build must finish without unresolved citations, references, or
+typesetting overflow warnings.
+
+## Use With Overleaf
+
+```bash
+make overleaf-package
+```
+
+Upload [`overleaf-package.zip`](overleaf-package.zip) as a new Overleaf project. The archive contains
+`main.tex`, `references.bib`, all eight vector PDF figures, and the generated LaTeX results table with
+the same relative paths used by the manuscript. Overleaf should detect `main.tex` as the root file and
+compile it with pdfLaTeX.
+
 ## Figure Map
 
 | Figure | Recommended placement | Main point |
